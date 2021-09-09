@@ -131,20 +131,24 @@ char *StrnCat(char *dest, const char *src, size_t n)
 
 char *StrStr(const char *haystack, const char *needle)
 {
-	char *hay = haystack;
-	char *nee = needle;	
+	char *hay = (char *)haystack;
+	char *nee = (char *)needle;	
 	
-	while ( '\0' != *hay)
+	while ( '\0' != *hay && '\0' != *nee)
 	{
-		if (*hay == *nee)
+			if (*hay == *nee)
+		{
 			++hay;
 			++nee;
+		}
 		else
+		{
 			++hay;
-			nee = needle;
+			nee = (char *)needle;
+		}
 	}
-	if ('\0' == *nee)
-		return haystack;
+	if ('\0' == *nee)	
+		return hay -= (nee-needle);
 	else 
 		return NULL;
 }
