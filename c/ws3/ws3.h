@@ -1,6 +1,6 @@
 #ifndef WS3_H 
 #define WS3_H
-#endif
+
 
 #include <stdio.h> /* printf */
 #include <stdlib.h> /* malloc */
@@ -14,3 +14,7 @@ void Print(char ** buffer);
 void Tolower (char ** buffer);
 void Free(char ** buffer);
 void Copy(char **envp, char **buffer);
+size_t Josephus (size_t n);
+void TurnZero (char *arr, size_t n, size_t i);
+
+#endif
