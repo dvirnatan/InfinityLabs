@@ -38,7 +38,7 @@ void q()
 	int *ptr2 = (int *)malloc(sizeof(int));
 	int i = 7;
 	int *ptr = &i;
-	printf("&s_i: %p\n", (void *) &s_i);
+	printf("&s_i: %p\n", (void *)&s_i);
 	printf("&ptr: %p\n", (void *)&ptr);
 	printf("&ptr2 %p\n", (void *)&ptr2);
 	if(ptr)

@@ -3,18 +3,18 @@
 
 void hello()
 {
-	char str[] = {0x48, 0x65, 0x6c, 0x6c,0x6f, 0x20, 0x57, 0x6f, 0x72, 0x6c, 0x64};
+	char str[] = {0x48, 0x65, 0x6c, 0x6c,0x6f, 0x20, 0x57, 0x6f, 0x72, 0x6c, 0x64, '\0'};
 	printf ("\"%s\"!\n",str);
 }
 
 int npow (int n)
 {
-	int i = power;
+	int i = n;
 	int res = 1;
 	
 	for ( ; i > 0; i--)
 	{
-		res *= n;
+		res *= power;
 	}
 	return res;
 }
@@ -25,11 +25,10 @@ int flip (int a)
 	
 	while (a > 0)
 	{
-		b += a % 10;
 		b *= 10;
+		b += a % 10;
 		a /= 10;
 	}
-	b /= 10;
 	return b;
 }
 

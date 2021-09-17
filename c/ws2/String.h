@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 
+size_t  StrLen (const char *str);
 char *StrCpy(char *dest, const char *src);
 char *StrnCpy(char *dest, const char *src, size_t n);
 int StrnCmp(const char *str1, const char *str2, size_t n);
@@ -15,7 +16,7 @@ char *StrnCat(char *dest, const char *src, size_t n);
 char *StrStr(const char *str1, const char *str2);
 size_t StrSpn(const char *str1, const char *str2);
 char *StrTok(char *str1, const char *str2);  /* advanced */
-
+size_t Palin (char *str);
 
 
 
