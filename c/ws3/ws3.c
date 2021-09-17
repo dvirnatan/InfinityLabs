@@ -1,8 +1,9 @@
-/*********************************************************
+/********************************************************
 *	Author: Dvir Natan
 *	Status: Sent
 *	Reviwer:Lior Ben Harosh
-*	Status: 
+*	Status: Approved
+*	Date: 17/09/21
 **********************************************************/
 
 
@@ -12,17 +13,17 @@
 #include <string.h> /*strdup */
 #include <ctype.h> /* tolower */
 
-char * strdup( const char *str1 ); /* or macro */
-void Envp (char **envp);
-void Print(char ** buffer);
-void Tolower (char ** buffer);
-void Free(char ** buffer);
-void Copy(char **envp, char **buffer);
-size_t Josephus (size_t n);
-void TurnZero (char *arr, size_t n, size_t i);
+char *strdup(const char *str1); /* or macro */
 
+static void Print(char ** buffer);
+static void Tolower(char ** buffer);
+static void Free(char ** buffer);
+static void Copy(char **envp, char **buffer);
+static void TurnZero(size_t *arr, size_t n, size_t i);
+void Envp(char **envp);
+size_t Josephus(size_t n);
 
-void TurnZero (char *arr, size_t n, size_t i)
+static void TurnZero(size_t *arr, size_t n, size_t i)
 {
 	for (; i < n - 1; ++i)
 	{
@@ -31,49 +32,95 @@ void TurnZero (char *arr, size_t n, size_t i)
 	arr[i] = 0;
 }
 	
-size_t Josephus (size_t n)
+size_t Josephus(size_t n)
 {
-	char *arr = malloc (n * sizeof(size_t));
+	size_t *arr = malloc(n * sizeof(size_t));
 	size_t i = 0;
 	size_t res = 0;
 	int kill = 0;
 
-	assert (arr != NULL);
+	assert(NULL != arr);
 	for (i = 0; i < n; ++i) 
 	{
 		arr[i] = i + 1;
 	}
 	
-	while (arr[1] != 0)
+	while (0 != arr[1])
 	{
-		for(i = 0; i < n && arr[i] != 0; kill = !kill)
+		for (i = 0; i < n && 0 != arr[i]; kill = !kill)
 		{
-			if (kill == 0)
+			if (0 == kill)
 			{
 				++i;
 			}
 			else
 			{
-				TurnZero (arr, n, i);
+				TurnZero(arr, n, i);
 			}
 		}
 	}
 	res = arr[0];
-	free (arr);	arr = NULL;	
+	free(arr);	arr = NULL;	
 	return res;	
 }
 
+static void Copy(char **envp, char **buffer)
+{
+	size_t i = 0;
+	assert(NULL != envp);
+	for (i = 0; NULL != envp[i]; ++i) 	
+	{
+		buffer[i] = strdup (envp[i]);
+		assert (NULL != buffer[i]);
+	}
+}
 
-void Envp (char **envp)
+static void Tolower(char **buffer)		
+{
+	size_t i, j = 0;
+	
+	for (i = 0; NULL != *(i + buffer); ++i)
+	{	
+		for (j = 0; '\0' != *(j + *(buffer + i)); ++j)
+		{
+			*(j + *(buffer + i)) = tolower(*(j + *(buffer + i)));
+		}
+	}
+}
+
+static void Print(char **buffer)	
+{
+	size_t i = 0;
+	
+	for (i = 0; NULL != *(buffer + i); ++i)	
+	{
+		printf("%s\n", *(buffer + i));
+	}
+}
+
+static void Free(char ** buffer) 	
+{
+	size_t i = 0;	
+	for (i = 0; *(i + buffer) != NULL; ++i)
+	{
+		free(*(i + buffer));
+	}
+	free (buffer);
+	buffer = NULL;
+}
+
+
+void Envp(char **envp)
 {
 	size_t i = 0;
 	char **buffer = NULL;
 	
-	for (i = 0; envp[i] != NULL; ++i) 	/* count number of pointers to creat */
+	assert(NULL != envp);
+	for (i = 0; NULL != envp[i]; ++i)  
 	;
 	
 	buffer = (char **)malloc (sizeof(char *) * (i + 1));
-	assert (buffer != NULL);
+	assert(buffer != NULL);
 	
 	buffer[i] = NULL;
 	
@@ -86,45 +133,11 @@ void Envp (char **envp)
 	Free (buffer);
 }
 
-void Print(char **buffer)	
-{
-	size_t i = 0;
-	
-	for (i = 0; *(buffer + i) != NULL; ++i)	
-	{
-		printf("%s\n", *(buffer + i));
-	}
-}
-
-void Free(char ** buffer) 	
-{
-	size_t i = 0;	
-	for (i = 0; *(i + buffer) != NULL ; ++i)
-	{
-		free(*(i + buffer));
-	}
-	free (buffer);
-	buffer = NULL;
-}
-
-void Tolower (char **buffer)		
-{
-	size_t i, j = 0;
-	
-	for (i = 0; *(i + buffer) != NULL ; ++i) 	
-		for (j = 0; *(j + *(buffer + i)) != '\0'; ++j)
-			*(j + *(buffer + i)) = tolower(*(j + *(buffer + i)));
-}
 
 
-void Copy(char **envp, char **buffer)
-{
-	size_t i = 0;
-	for (i = 0; envp[i] != NULL; ++i) 	
-	{
-		buffer[i] = strdup (envp[i]);
-		assert (buffer[i] != NULL);
-	}
-}
+
+
+
+
 
 
