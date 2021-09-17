@@ -30,16 +30,50 @@ void TestStrnCat ()
 	 	printf("Not good StrnCat");
 }
 
+void TestStr ()
+{
+	char haystack[] = "abcdefghijklmnop";
+	char needle[] = "hijk";
+	
+	if (StrStr (haystack, needle) != strstr (haystack, needle))
+		printf("Not good StrStr\n"); 
+		
+	printf("strtr: %c\n", *strstr(haystack,needle));
+	if (StrStr(haystack,needle) != NULL)
+		printf("StrStr: %c\n", *StrStr(haystack,needle));
+	else 
+		printf("NULL\n");
+}
 
+void TestStrSpn ()
+{
+	char s[] = "abcdefghijklmnopqrstuwxy";
+	char a[] = "abccz";
+	
+	if(strspn(s,a) != StrSpn(s,a))
+		printf("Not good StrSpn");
+	printf("%ld" , strspn(s,a));
+	printf("%ld" , StrSpn(s,a));
 
+}
+
+void TestPalin()
+{
+	char sA[] = "redivider";
+	char sB[] = "redivqder";
+	
+	printf("%ld, %ld" ,Palin(sA), Palin(sB));
+}
 
 
 
 int main ()
 {
 	/* TestStrChr ();  
-	 TestStrCat ();*/
-	 	
+	 TestStrCat ();
+	 TestStr();
+	 TestStrSpn (); */
+	 TestPalin();	
 	return 0;
 }
 
