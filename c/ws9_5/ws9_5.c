@@ -1,8 +1,8 @@
-#include <stdio.h>
-#include <stdlib.h> /* atio */
+#include <stdio.h>  /* printf */
 #include <ctype.h>/* isspace() */
 #include <math.h> /* pow() */
-#include <assert.h>
+#include <assert.h> /* assert */
+#include <stdlib.h>
 #include "ws9_5.h"
 
 
@@ -17,9 +17,9 @@ long int AtoiBase10(const char *nptr)
 	const char *ptr = nptr;
 	int sign_flag = 1;
 	
-	for( ; isspace(*ptr) && *ptr != '\0' ; ++ptr )
+	for( ; isspace(*ptr) && *ptr != '\0' ; ++ptr ) 
 		;
-	if ( *ptr == 45 )
+	if ( *ptr == 45 ) /* 45 = '-' */
 	{
 		++ptr;
 		sign_flag = -1;
