@@ -119,7 +119,7 @@ void *MemCpy(void *dest, const void *src, size_t n)
 			--n;
 			--offset;
 		}
-		if ( *r_src == '\0' )
+		if ( '\0' == *r_src  )
 		{
 			*r_dest = '\0';
 		}
@@ -130,7 +130,7 @@ void *MemCpy(void *dest, const void *src, size_t n)
 	
 	if ( offset == 0 && n >= WORD_SIZE )
 	{
-		while ((n >= WORD_SIZE) && (b_src != NULL) && (*b_src != '\0'))
+		while ((n >= WORD_SIZE) && ( NULL != b_src) && ( '\0' != *b_src))
 		{ 
 			*b_dest = *b_src;
 			++b_dest;
@@ -165,14 +165,14 @@ void *MemMove(void *dest, const void *src, size_t n)
 	const char *r_src = (char *)src;
 	size_t addr_src = (size_t)r_src;
 	size_t addr_dest = (size_t)r_dest;
-	long diff = 0;
+	long distance = 0;
 	
 	assert(NULL != dest);
 	assert(NULL != src);
 	
-	diff = (long)addr_dest - (long)addr_src;
+	distance = (long)addr_dest - (long)addr_src;
 
-	if ((diff > (long)n) || (diff < 0))
+	if ((distance > (long)n) || (distance < 0))
 
 	{
 		MemCpy(r_dest, r_src, n);
