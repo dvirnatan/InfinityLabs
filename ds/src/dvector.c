@@ -75,6 +75,11 @@ dvector_t *DVectorPushBack(dvector_t *dvector, void *element)
 	    dvector = DVectorResize(dvector, 1+(dvector -> size)*RESIZE_FACTOR);
 	}
 	
+	if (NULL == dvector)
+	{
+		 return dvector;
+	}
+	
 	element_ptr = (void**)(dvector + 1);
 	element_ptr[dvector -> size] = element;
 
