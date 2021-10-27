@@ -10,7 +10,13 @@
 #include <stddef.h> /* size_t */
 #include <stdlib.h> /* malloc */
 #include <assert.h> /* assert */
-#include "sllist.h"
+#include "/home/dvir/git/ds/include/sllist.h" 
+
+struct sllist_node 
+{
+    void *data;
+    sllist_node_t *next_node;
+};
 
 struct sllist
 {
@@ -18,11 +24,6 @@ struct sllist
     sllist_node_t *tail;
 };
 
-struct sllist_node 
-{
-    void *data;
-    sllist_node_t *next_node;
-};
 
 sllist_t *SLListCreate(void)
 {

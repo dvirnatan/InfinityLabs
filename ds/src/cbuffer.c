@@ -25,7 +25,7 @@ cbuff_t *CBuffCreate(size_t initial_capacity)
 {
 	cbuff_t *cbuffer = malloc(offsetof(cbuff_t, buffer) + initial_capacity + 1);
 	
-	if (cbuffer != NULL)
+	if (NULL != cbuffer)
 	{
 		cbuffer->capacity = initial_capacity;
 		cbuffer->write = 0;
@@ -39,7 +39,7 @@ void CBuffDestroy(cbuff_t *cbuffer)
 {
 	assert(NULL != cbuffer);
 	
-	free(cbuffer);
+	free(cbuffer); cbuffer = NULL;
 }
 
 ssize_t CBuffWrite(cbuff_t *cbuffer, const void *src, size_t nbytes)
