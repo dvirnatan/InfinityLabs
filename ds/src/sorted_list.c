@@ -4,7 +4,6 @@ Reviewer: Or Shoham
 Status: Sent
 Date: 26.10.21
 ***************************************/
-#include <stddef.h> /* size_t */
 #include <stdlib.h> /* malloc */
 #include <assert.h> /* assert */
 
@@ -96,6 +95,8 @@ int SortedListInsert(sorted_list_t *list, void *data)
 	sorted_list_iter_t soliter;
 	int sort = 0;
 
+	assert(NULL != list);
+
 	for(soliter.inner_iter = DLListBegin(list->list); 
 		!DLListIsSameIter(soliter.inner_iter, DLListEnd(list->list)) &&
 		(sort = list->cmp_func_t(DLListGetData(soliter.inner_iter), data)) <= 0;
@@ -117,11 +118,15 @@ void *SortedListGetData(const sorted_list_iter_t iter)
 
 size_t SortedListSize(const sorted_list_t *list)
 {
+	assert(NULL != list);
+
 	return DLListSize(list->list);
 }
 
 int SortedListIsEmpty(const sorted_list_t *list)
 {
+	assert(NULL != list);
+
 	return DLListIsEmpty(list->list);
 }
 

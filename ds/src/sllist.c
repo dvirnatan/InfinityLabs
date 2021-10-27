@@ -10,7 +10,7 @@
 #include <stddef.h> /* size_t */
 #include <stdlib.h> /* malloc */
 #include <assert.h> /* assert */
-#include "/home/dvir/git/ds/include/sllist.h" 
+#include "sllist.h" 
 
 struct sllist_node 
 {
@@ -24,12 +24,11 @@ struct sllist
     sllist_node_t *tail;
 };
 
-
 sllist_t *SLListCreate(void)
 {
     sllist_t *list = malloc(sizeof(sllist_t));
     
-    if(list)
+    if(NULL != list)
     {
         list->head = malloc(sizeof(sllist_node_t));
         list->tail = malloc(sizeof(sllist_node_t));
@@ -47,15 +46,13 @@ void SLListDestroy(sllist_t *list)
 	sllist_iter_t runner = list->head;
 	sllist_iter_t tmp = list->head;
 	
-	while(tmp)
+	while(NULL != tmp)
 	{
 		runner = tmp;
 		tmp = runner->next_node;	
 		
-		free(runner);
-				
+		free(runner);	
 	}
-	
 	free(list);
 }
 
@@ -127,10 +124,13 @@ int SLListInsertBefore(sllist_t *list, sllist_iter_t iter, void *data)
 
 void SLListRemove(sllist_t *list, sllist_iter_t iter)
 {
-
-	sllist_iter_t tmp = iter->next_node;
+	sllist_iter_t tmp;
 	
-	*iter = *tmp ;
+	assert(NULL != list);
+	assert(NULL != iter);
+
+	tmp = iter->next_node;
+	*iter = *tmp;
 	
 	if(tmp == list->tail)
 	{
@@ -144,12 +144,14 @@ sllist_iter_t SLListFind(void* data,
 		   sllist_iter_t from, sllist_iter_t to,
 		   int (*is_match)(const void *, const void *))
 {
-	
 	int is_match_flag = 0;
+	
+	assert(NULL != from);
+	assert(NULL != to);	
+	assert(NULL != is_match);
 	
 	while(from != to)
 	{
-		
 		is_match_flag = is_match(data, from->data);
 		
 		if (1 == is_match_flag)
@@ -157,7 +159,6 @@ sllist_iter_t SLListFind(void* data,
 			return from;
 		}
 		from = SLListNext(from);
-	
 	}
 
 	return to;
@@ -167,9 +168,12 @@ sllist_iter_t SLListForEach(sllist_iter_t from, sllist_iter_t to,
 		   int (*action_func)(void *data, void *params),
 		   void *params)
 {
-	
 	int flag = 0;
-		
+	
+	assert(NULL != from);
+	assert(NULL != to);	
+	assert(NULL != action_func);
+	
 	flag = action_func(from->data, params);
 	
 	do
@@ -210,8 +214,8 @@ int SLListIsEmpty(const sllist_t *list)
 
 void SLListAppend(sllist_t *dest, sllist_t *src)
 {
-	assert(src);
-	assert(dest);
+	assert(NULL != src);
+	assert(NULL != dest);
 	
 	*(dest->tail) = *(SLListBegin(src));
 	*(SLListBegin(src)) = *(src->tail);	
