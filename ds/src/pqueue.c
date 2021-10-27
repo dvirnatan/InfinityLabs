@@ -87,39 +87,25 @@ void *PQPeek(const pqueue_t *pqueue)
 {
 	assert(NULL != pqueue);
 	
-	return SortedListGetData(SortedListPrev(SortedListEnd(pqueue->sorted_list)));		
+	return SortedListGetData(SortedListPrev(SortedListEnd(pqueue->sorted_list)));
 }
 
 void *PQErase(pqueue_t *pqueue, 
 			void *data, int (*is_match)(const void *, const void *))
 {
-	void *ret = NULL;
-	sorted_list_iter_t soliter;
+	void *temp;
 	
 	assert(NULL != pqueue);
+	assert(NULL != is_match);
 	
-	soliter = SortedListEnd(pqueue->sorted_list);
-	soliter = SortedListPrev(soliter);
-	
-	while(!SortedListIsSameIter(SortedListPrev(SortedListBegin(pqueue->sorted_list)), soliter) && is_match(SortedListGetData(soliter), data) != 1)
+	temp = SortedListGetData(SortedListFindIf(SortedListBegin(pqueue->sorted_list), SortedListEnd(pqueue->sorted_list), data, is_match));
+
+	if (!SortedListIsSameIter(SortedListFindIf(SortedListBegin(pqueue->sorted_list), SortedListEnd(pqueue->sorted_list), data, is_match), SortedListEnd(pqueue->sorted_list)))
 	{
-		soliter = SortedListPrev(soliter);
+		SortedListRemove(SortedListFindIf(SortedListBegin(pqueue->sorted_list), SortedListEnd(pqueue->sorted_list), data, is_match));
 	}
-	
-	if(!SortedListIsSameIter(SortedListPrev(SortedListBegin(pqueue->sorted_list)), soliter))
-	{
-		ret = SortedListGetData(soliter);
-		SortedListRemove(soliter);
-	}
-	return ret;
+		return temp;
 }
-
-
-
-
-
-
-
 
 
 
