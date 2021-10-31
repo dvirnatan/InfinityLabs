@@ -93,6 +93,34 @@ void *PQPeek(const pqueue_t *pqueue)
 void *PQErase(pqueue_t *pqueue, 
 			void *data, int (*is_match)(const void *, const void *))
 {
+	void *ret = NULL;
+	sorted_list_iter_t soliter;
+	
+	assert(NULL != pqueue);
+	
+	soliter = SortedListEnd(pqueue->sorted_list);
+	soliter = SortedListPrev(soliter);
+	
+	while(!SortedListIsSameIter(SortedListPrev(SortedListBegin(pqueue->sorted_list)), soliter) && is_match(SortedListGetData(soliter), data) != 1)
+	{
+		soliter = SortedListPrev(soliter);
+	}
+	
+	if(!SortedListIsSameIter(SortedListPrev(SortedListBegin(pqueue->sorted_list)), soliter))
+	{
+		ret = SortedListGetData(soliter);
+		SortedListRemove(soliter);
+	}
+	return ret;
+}
+
+
+
+
+
+/*
+ERASE "WITOUT ITERATOR"
+
 	void *temp;
 	
 	assert(NULL != pqueue);
@@ -105,16 +133,7 @@ void *PQErase(pqueue_t *pqueue,
 		SortedListRemove(SortedListFindIf(SortedListBegin(pqueue->sorted_list), SortedListEnd(pqueue->sorted_list), data, is_match));
 	}
 		return temp;
-}
-
-
-
-
-
-
-
-
-
+*/
 
 
 
