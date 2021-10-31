@@ -225,32 +225,48 @@ sorted_list_iter_t SortedListFindIf(sorted_list_iter_t from, sorted_list_iter_t 
 
 void SortedListMerge(sorted_list_t *dest, sorted_list_t *src)
 {
-	dllist_iter_t dest_runner;
-	dllist_iter_t src_runner;
-	
-	assert(NULL != src);
-	assert(NULL != dest);
-	assert(src->cmp_func_t == dest->cmp_func_t);
-	
-	dest_runner = DLListBegin(dest->list);
-	while (!DLListIsEmpty(src->list))
-	{
-		for (; !DLListIsSameIter(dest_runner, DLListEnd(dest->list)) &&
-			 0 >= dest->cmp_func_t(DLListGetData(dest_runner), DLListGetData(DLListBegin(src->list)));
-			 dest_runner = DLListNext(dest_runner))
-			 ;
-		if (DLListIsSameIter(dest_runner, DLListEnd(dest->list)))
-		{
-			DLListSplice(DLListBegin(src->list), DLListEnd(src->list), dest_runner);
-			return;
-		}
-		for (src_runner = DLListBegin(src->list);
-			 !DLListIsSameIter(src_runner, DLListEnd(src->list)) &&
-			 0 < dest->cmp_func_t(DLListGetData(dest_runner), DLListGetData(src_runner));
-			 src_runner = DLListNext(src_runner))
-			 ;
-		DLListSplice(DLListBegin(src->list), src_runner, dest_runner);
-	}
+    sorted_list_iter_t from_src;
+    sorted_list_iter_t to_src;
+    sorted_list_iter_t runner_dest;
+    
+    assert(dest);
+    assert(src);
+    assert(dest->list != src->list);
+    
+    runner_dest = SortedListBegin(dest);
+    
+    while(!SortedListIsEmpty(src))
+    {
+           /*src_runner points to first node of src*/
+        from_src = SortedListBegin(src);
+        
+        /*traversing dest until the node we want to insert before*/
+        while(!SortedListIsSameIter(runner_dest,SortedListEnd(dest)) &&
+                             dest->cmp_func_t(SortedListGetData(runner_dest)
+                                             ,SortedListGetData(from_src)) <= 0)
+        {
+            runner_dest = SortedListNext(runner_dest);
+        }
+        
+        /*If runner is at tail node, regular splice*/
+        if(SortedListIsSameIter(runner_dest,SortedListEnd(dest)))
+        {
+            DLListSplice(SortedListBegin(src).inner_iter,SortedListEnd(src)
+                                        .inner_iter,runner_dest.inner_iter);
+            return;
+        }
+        
+        to_src = SortedListNext(from_src);
+        /*traversing src until the last node we want to splice.*/
+        while( !SortedListIsSameIter(to_src,SortedListEnd(src)) &&    
+                        dest->cmp_func_t(SortedListGetData(runner_dest),                           
+                                             SortedListGetData(to_src)) > 0)
+        {
+            to_src = SortedListNext(to_src);
+        }
+        
+        DLListSplice(from_src.inner_iter,to_src.inner_iter,runner_dest.inner_iter);
+    }
 }
 
 
