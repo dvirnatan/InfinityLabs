@@ -1,10 +1,8 @@
 /******************************************
-
 	Author: Dvir Natan
-	Date:
-	Reviewer:
-	
-	
+	Date: 31.10.21
+	Reviewer: Eli
+	Status: Approved
 ******************************************/
 
 
@@ -25,7 +23,7 @@ ilrd_uid_t UIDCreate(void)
 
 int UIDIsSame(ilrd_uid_t one, ilrd_uid_t other)
 {
-	return (one.time_stamp == other.time_stamp)*(one.pid == other.pid)*(one.counter == other.counter);
+	return (one.time_stamp == other.time_stamp)&&(one.pid == other.pid)&&(one.counter == other.counter);
 }
 
 ilrd_uid_t UIDGetBadUID(void)

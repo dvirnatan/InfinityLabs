@@ -1,9 +1,9 @@
 /******************************************
 	_______Scheduler_______
 	Author: Dvir Natan
-	Date:
-	Reviewer:
-	Status:
+	Date: 31.10.21
+	Reviewer: Eli
+	Status: Approved
 ******************************************/
 #include <stdlib.h>
 #include <assert.h>
@@ -59,11 +59,7 @@ void SchedDestroy(sched_t *sched)
 {
 	assert(NULL != sched);
 	
-	while(!PQIsEmpty(sched->pqueue))
-	{
-		TaskDestroy(PQPeek(sched->pqueue));
-		PQDequeue(sched->pqueue);
-	}
+	SchedFlush(sched->pqueue);
 	PQDestroy(sched->pqueue);
 	free(sched); sched = NULL;
 }
@@ -93,9 +89,15 @@ static int TaskIsSameUID(const void *task1, const void *uid)
 
 void SchedRemoveTask(sched_t *sched, ilrd_uid_t task_uid)
 {
+	task_t *tmp;	
+	
 	assert(NULL != sched);
 	
-	TaskDestroy(PQErase(sched->pqueue, &task_uid, TaskIsSameUID));
+	tmp = PQErase(sched->pqueue, &task_uid, TaskIsSameUID);
+	if(NULL != tmp)
+	{	
+		TaskDestroy(tmp);
+	}
 }
 
 size_t SchedSize(const sched_t *sched)
@@ -125,7 +127,9 @@ int SchedRun(sched_t *sched)
     {
         tmp = PQPeek(sched->pqueue);
         PQDequeue(sched->pqueue);
+        
         sleep_for = start_time - time(0) + TaskGetTimeToExec(tmp);
+        
 		while(sleep_for > 0)
 		{
 			sleep(1);
@@ -166,16 +170,12 @@ int SchedRun(sched_t *sched)
     return OK;
 }
 
-static int StopTaks(void *sched)
-{
-	sched_t *sched1 = sched;
-	sched1->is_runing = 0;
-	return 0;
-}
 
 void SchedStop(sched_t *sched)
 {
-	SchedAddTask(sched, 0, 0, StopTaks, sched);
+	assert(NULL != sched);
+	
+	sched->is_runing = 0;
 }
 
 void SchedFlush(sched_t *sched)
