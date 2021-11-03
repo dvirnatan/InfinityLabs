@@ -1,7 +1,8 @@
 /**************************
 *		Cbuffer		
 *	Author: Dvir Natan
-*	Status: sent
+*	Reviwer: Neria
+*	Status: Aprroved
 *	Date: 22.10.21
 **************************/
 
@@ -30,7 +31,9 @@ cbuff_t *CBuffCreate(size_t initial_capacity)
 		cbuffer->capacity = initial_capacity;
 		cbuffer->write = 0;
 		cbuffer->read = 0;
+		#ifndef NDEBUG
 		cbuffer->password = 0XF44EC0DE;
+		#endif
 	}
 	return cbuffer;
 }
@@ -50,11 +53,12 @@ ssize_t CBuffWrite(cbuff_t *cbuffer, const void *src, size_t nbytes)
 	
 	assert(NULL != cbuffer);
 	assert(NULL != src);	
-				
+	#ifndef NDEBUG			
 	if(cbuffer->password != 0XF44EC0DE)
 	{
 		return -1;
 	}
+	#endif
 
 	while(nbytes > 0 && CBuffFreeSpace(cbuffer) > 0)
 	{
@@ -82,10 +86,12 @@ ssize_t CBuffRead(cbuff_t *cbuffer, void *dest, size_t nbytes)
 	assert(NULL != cbuffer);
 	assert(NULL != dest);
 	
+	#ifndef NDEBUG
 	if(cbuffer->password != 0XF44EC0DE)
 	{
 		return -1;
 	}
+	#endif
 	
 	while(nbytes > 0 && !CBuffIsEmpty(cbuffer))
 	{
