@@ -1,9 +1,9 @@
 /**************************************	
-			Priorety Queue
-			Author: Dvir Natan
-			Reviewer: 
-			Status: 
-			Date: 
+		Priorety Queue
+		Author: Dvir Natan
+		Reviewer: Alon
+		Status: Approved
+		Date: 26.10.21
 ***************************************/
 
 #include <stddef.h> /* size_t */
@@ -114,29 +114,6 @@ void *PQErase(pqueue_t *pqueue,
 	return ret;
 }
 
-
-
-
-
-/*
-ERASE "WITOUT ITERATOR"
-
-	void *temp;
-	
-	assert(NULL != pqueue);
-	assert(NULL != is_match);
-	
-	temp = SortedListGetData(SortedListFindIf(SortedListBegin(pqueue->sorted_list), SortedListEnd(pqueue->sorted_list), data, is_match));
-
-	if (!SortedListIsSameIter(SortedListFindIf(SortedListBegin(pqueue->sorted_list), SortedListEnd(pqueue->sorted_list), data, is_match), SortedListEnd(pqueue->sorted_list)))
-	{
-		SortedListRemove(SortedListFindIf(SortedListBegin(pqueue->sorted_list), SortedListEnd(pqueue->sorted_list), data, is_match));
-	}
-		return temp;
-*/
-
-
-
-
+/*________________________EOF__________________________*/
 
 

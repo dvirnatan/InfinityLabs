@@ -1,3 +1,10 @@
+/********************************************
+	Author: Dvir Natan
+	Reviewer: Yair
+	Status: Approved
+	Date: 19/10/21
+********************************************/
+
 #include <stddef.h> /* size_t */
 #include <stdlib.h> /* malloc */
 #include <assert.h> /* assert */
@@ -72,4 +79,6 @@ void QAppend(queue_t *dest, queue_t *src)
 	
 	SLListAppend(dest->sllist, src->sllist);
 }
+
+/*____________________EOF__________________________*/
 
