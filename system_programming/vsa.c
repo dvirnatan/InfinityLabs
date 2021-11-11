@@ -1,6 +1,6 @@
 /**************************************************************
 	Auotor: Dvir Natan
-	Reviwer: Neria
+	Reviwer: Eli
 	Date: 9/11/2021
 	Status: Send
 **************************************************************/
@@ -8,6 +8,7 @@
 #include <stddef.h> /* size_t */
 #include <sys/types.h>/* ssize_t */
 #include <assert.h>
+#include <stdlib.h> /*abs()*/
 
 #include "vsa.h"
 
@@ -49,38 +50,30 @@ vsa_t *VSAInit(void *pool_start, size_t pool_size)
 	return (vsa_t*)pool_start; 
 }
 
+static void Defrag(vsa_t *pool)
+{
+	vsa_header_t *runner;
+	vsa_header_t *next;
+	ssize_t end;
+	
+	runner = (vsa_header_t*)pool + 1;
+	end = pool->pool_size - 2*WORD_SIZE;
+	
+	while(end > 0 && runner->block_size != end)	
+	{
+		next = runner + (labs(runner->block_size) / WORD_SIZE + 1);
 
-static void dfreg(vsa_header_t *pool)
-{    
-    vsa_header_t *header = pool;
-    vsa_header_t *next_header;
-    ssize_t end = pool->block_size;
-
-	assert(NULL != pool);
-
-    while(end > 0)
-    {  
-        if(header->block_size > 0)
-        {	  
-            next_header = header + (header->block_size / WORD_SIZE) + 1;
-            if(next_header->block_size > 0)
-            {
-                header->block_size += next_header->block_size + WORD_SIZE;
-            }
-            else
-            {
-                header = next_header;        
-                end -= ((-1 * header->block_size) + WORD_SIZE);       
-            }
-        }
-        else
-        {
-        	header += ((-1 * header->block_size / WORD_SIZE) + 1);
-            end -= (-1 * header->block_size + WORD_SIZE);              
-        }
-    }
+		if(runner->block_size > 0 && next->block_size > 0)
+		{
+			runner->block_size += next->block_size + WORD_SIZE;
+		}
+		else
+		{
+			end -= (labs(runner->block_size) + WORD_SIZE);
+			runner = next;
+		}
+	}
 }
-
 
 void *VSAAlloc(vsa_t *pool, size_t size)
 {
@@ -94,18 +87,18 @@ void *VSAAlloc(vsa_t *pool, size_t size)
 	
 	runner = (vsa_header_t*)pool + 1; 
 	
-	dfreg(runner);
+	Defrag(pool);
 	
 	if((diff = size % WORD_SIZE) > 0)
 	{
-			size += WORD_SIZE - diff;
+			size -= WORD_SIZE - diff;
 	}
 	
 	end = pool->pool_size - 2*WORD_SIZE;
 	
 	while((runner->block_size < 0 || runner->block_size < (ssize_t)size) && end > 0)
 	{
-		runner = (vsa_header_t*) ((char*)runner + runner->block_size * -1 + WORD_SIZE);
+		runner = (vsa_header_t*)((char*)runner + runner->block_size * -1 + WORD_SIZE);
 		end -= (runner->block_size + WORD_SIZE);
 	}
 	
@@ -147,11 +140,11 @@ size_t VSALargestBlockAvailble(vsa_t *pool)
 	
 	assert(NULL != pool);
 	
-	end = pool->pool_size;
+	end = pool->pool_size - 2*WORD_SIZE;
 	runner = (vsa_header_t*)(pool + 1);
 	
-	dfreg(runner);
-
+	Defrag(pool);
+	
 	while (end > 0)
 	{
 		if(runner->block_size > max)
@@ -159,16 +152,11 @@ size_t VSALargestBlockAvailble(vsa_t *pool)
 			max = runner->block_size;
 		}
 		
-		size = runner->block_size;
-		if(size < 0)
-		{
-			size = -size;
-		}
-		
-		runner = (vsa_header_t*)((char*)runner + size + WORD_SIZE);
-		end = end - (runner->block_size + WORD_SIZE);
+		end -= (labs(runner->block_size) + WORD_SIZE);
+		runner += (labs(runner->block_size) / WORD_SIZE + 1);
 	}
 	return max;
 }
 
+/*__________________EOF________________________*/
 
