@@ -3,7 +3,7 @@
 *		Author: Dvir Natan
 *		Reviewer: Yair
 *		Date: 17/11/21
-*		Status: Send
+*		Status: Approved
 **************************************************/
 
 #include <stdlib.h>
@@ -60,9 +60,7 @@ static btree_iter_t BTreeMax(btree_iter_t iter)
 btree_t *BTreeCreate(int (*cmp_func)
 			(const void *one, const void *other, void *params), void *params)
 {
-
-	btree_t *tree;
-	
+	btree_t *tree = NULL;
 	
 	assert(NULL != cmp_func);
 	
@@ -138,9 +136,6 @@ btree_iter_t BTreePrev(btree_iter_t iter)
 
 int BTreeIsSameIter (btree_iter_t one, btree_iter_t other)
 {
-	assert(one);
-	assert(other);
-	
 	return (one == other);
 }
 
@@ -161,7 +156,7 @@ void *BTreeGetData (btree_iter_t iter)
 btree_iter_t BTreeInsert(btree_t *tree, void *data)
 {
 	btree_node_t *new_node;
-	btree_iter_t runner, runner_parent;
+	btree_iter_t runner, runner_parent; 
 	
 	assert(tree);
 	
@@ -243,9 +238,9 @@ void BTreeRemove(btree_iter_t iter)
 	{
 		child->parent = to_remove->parent; /* firt step to delete to_remove, pointing child parent
 								  				to to_remove parent */
-	}								
-	
-	to_remove->parent->child[to_remove == to_remove->parent->child[right]] = child; /*second step */
+	}		
+							
+	to_remove->parent->child[BTreeIsSameIter(to_remove,to_remove->parent->child[right])] = child; /*second step */
 												 
 	if(to_remove != iter)
 	{
@@ -296,7 +291,7 @@ btree_iter_t BTreeForEach(btree_iter_t from, btree_iter_t to,
 {
 	assert(action_func);
 
-	while(from != to)
+	while(!BTreeIsSameIter(from,to))
 	{
 		if(action_func(from->data, params))
 		{
@@ -316,7 +311,7 @@ size_t BTreeSize(const btree_t *tree)
 	
 	iter = BTreeBegin(tree);
 	
-	while(iter != BTreeEnd(tree))
+	while(!BTreeIsSameIter(iter, BTreeEnd(tree)))
 	{
 		iter = BTreeNext(iter);
 		++counter;
@@ -325,7 +320,5 @@ size_t BTreeSize(const btree_t *tree)
 	return counter;
 }
 
-
-
-
+/*_______________________EOF_____________________*/
 
