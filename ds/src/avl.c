@@ -2,8 +2,8 @@
 *		AVL
 *		Author: Dvir Natan
 *		Reviewer: Matan
-*		Date: 30/11/21
-*		Status: 
+*		Date: 1/12/21
+*		Status: Approved
 **************************************************/
 
 #include <stdlib.h> /* size_t */
@@ -189,19 +189,18 @@ static avl_node_t *RemoveAux(int (*cmp_func)(const void *, const void *),
 	if(status != 0)
 	{
 		node->child[status < 0] = RemoveAux(cmp_func, node->child[status < 0], data);
-		node = Balance(node);
-		
+
 		return node;
 	}
 	
 	if(NULL != node->child[LEFT] && NULL != node->child[RIGHT])
 	{
-		node->data = Min(tmp_node->child[RIGHT])->data;/*swap data with next*/
+
+		node->data = Min(tmp_node->child[RIGHT])->data;
 		Min(tmp_node->child[RIGHT])->data = tmp_data;
 		
 		node->child[RIGHT] = RemoveAux(cmp_func, node->child[RIGHT], data);
-		node = Balance(node);
-		
+
 		return node;
 	}
 		
@@ -219,7 +218,10 @@ void AVLRemove(avl_t *tree, void *data)
 	{
 		tree->root = RemoveAux(tree->cmp_func, tree->root, data);;
 	}
+	tree->root = Balance(tree->root);
 }
+
+
 
 int AVLForEach(avl_t *tree, int (*action_func)(void *data, void *params), 
 									void *params, traversal_t type)
@@ -227,6 +229,11 @@ int AVLForEach(avl_t *tree, int (*action_func)(void *data, void *params),
 	assert(tree != NULL);	
 	assert(action_func != NULL);
 	
+	if(tree->root == NULL)
+	{
+		return 1;
+	}
+
 	return function_lut[type](tree->root, action_func, params);
 }
 
@@ -252,9 +259,12 @@ void AVLDestroy(avl_t *tree)
 {
 	assert(tree != NULL);		
 	
-	DestroyAux(tree->root);
-	tree->root = NULL;
-	
+	if(!tree->root)
+	{
+		DestroyAux(tree->root);
+		tree->root = NULL;
+	}
+
 	free(tree);
 }
 
