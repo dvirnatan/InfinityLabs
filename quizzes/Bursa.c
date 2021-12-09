@@ -13,7 +13,7 @@ struct result Bursa (int *arr, size_t len);
 
 int main()
 {
-	int arr[10] = {2, 3, 2, 4, 10, 8, 5, 7, 4, 4};
+	int arr[10] = {2, 2, 4, 1, 8, 5, 7, 4, 20};
 	struct result res;
 	res = Bursa (arr, 10);
 	printf("i_min = %ld, i_max = %ld, profit = %ld\n", res.i_min,

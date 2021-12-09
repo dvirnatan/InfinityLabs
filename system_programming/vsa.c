@@ -2,7 +2,7 @@
 	Auotor: Dvir Natan
 	Reviwer: Eli
 	Date: 9/11/2021
-	Status: Send
+	Status: Approved
 **************************************************************/
 
 #include <stddef.h> /* size_t */
@@ -12,7 +12,7 @@
 
 #include "vsa.h"
 
-#define WORD_SIZE sizeof(size_t)
+#define HEADER_SIZE sizeof(vsa_header_t)
 
 struct vsa
 {
@@ -33,19 +33,19 @@ vsa_t *VSAInit(void *pool_start, size_t pool_size)
 	size_t diff;
 	
 	assert(NULL != pool_start);
-	assert(pool_size > WORD_SIZE * 2);
+	assert(pool_size > HEADER_SIZE * 2);
 	
-	if((diff = (size_t)pool_start % WORD_SIZE) > 0)
+	if((diff = (size_t)pool_start % HEADER_SIZE) > 0)
 	{
-		pool_start = (void*) ((char*)pool_start + (WORD_SIZE - diff));
-		pool_size -= (WORD_SIZE);
+		pool_start = (void*)((char*)pool_start + (HEADER_SIZE - diff));
+		pool_size -= (HEADER_SIZE - diff);
 	}
 	
 	vsa.pool_size = pool_size;
 	*(vsa_t*)pool_start = vsa;
 	header = (vsa_header_t*)pool_start + 1;
 	
-	header->block_size = pool_size - 2 * WORD_SIZE;
+	header->block_size = pool_size - 2 * HEADER_SIZE;
 	
 	return (vsa_t*)pool_start; 
 }
@@ -57,19 +57,19 @@ static void Defrag(vsa_t *pool)
 	ssize_t end;
 	
 	runner = (vsa_header_t*)pool + 1;
-	end = pool->pool_size - 2*WORD_SIZE;
+	end = pool->pool_size - 2*HEADER_SIZE;
 	
 	while(end > 0 && runner->block_size != end)	
 	{
-		next = runner + (labs(runner->block_size) / WORD_SIZE + 1);
+		next = runner + (labs(runner->block_size + HEADER_SIZE) / HEADER_SIZE);
 
 		if(runner->block_size > 0 && next->block_size > 0)
 		{
-			runner->block_size += next->block_size + WORD_SIZE;
+			runner->block_size += next->block_size + HEADER_SIZE;
 		}
 		else
 		{
-			end -= (labs(runner->block_size) + WORD_SIZE);
+			end -= (labs(runner->block_size) + HEADER_SIZE);
 			runner = next;
 		}
 	}
@@ -89,17 +89,17 @@ void *VSAAlloc(vsa_t *pool, size_t size)
 	
 	Defrag(pool);
 	
-	if((diff = size % WORD_SIZE) > 0)
+	if((diff = size % HEADER_SIZE) > 0)
 	{
-			size -= WORD_SIZE - diff;
+			size -= HEADER_SIZE - diff;
 	}
 	
-	end = pool->pool_size - 2*WORD_SIZE;
+	end = pool->pool_size - 2*HEADER_SIZE;
 	
 	while((runner->block_size < 0 || runner->block_size < (ssize_t)size) && end > 0)
 	{
-		runner = (vsa_header_t*)((char*)runner + runner->block_size * -1 + WORD_SIZE);
-		end -= (runner->block_size + WORD_SIZE);
+		runner += 1 + labs(runner->block_size) / HEADER_SIZE;
+		end -= (runner->block_size + HEADER_SIZE);
 	}
 	
 	if(end <= 0)
@@ -109,15 +109,15 @@ void *VSAAlloc(vsa_t *pool, size_t size)
 	
 	tmp = runner->block_size;
 	runner->block_size = -1 * size;
-	runner = (vsa_header_t*)((char*)runner + size + WORD_SIZE);
+	runner = (vsa_header_t*)((char*)runner + size + HEADER_SIZE);
 	
-	if(tmp > (ssize_t)(size + WORD_SIZE))
+	if(tmp > (ssize_t)(size + HEADER_SIZE))
 	{
-		runner->block_size = tmp - (size + WORD_SIZE);
-		runner = (vsa_header_t*)((char*)runner - size - WORD_SIZE);	
+		runner->block_size = tmp - (size + HEADER_SIZE);
+		runner = (vsa_header_t*)((char*)runner - size - HEADER_SIZE);	
 	}		
 	
-	return ++runner;	
+	return (runner + 1);	
 }
 
 void VSAFree(void *block)
@@ -134,13 +134,12 @@ void VSAFree(void *block)
 size_t VSALargestBlockAvailble(vsa_t *pool)
 {
 	ssize_t max = 0;
-	ssize_t size = 0;
 	vsa_header_t *runner;
 	ssize_t end;
 	
 	assert(NULL != pool);
 	
-	end = pool->pool_size - 2*WORD_SIZE;
+	end = pool->pool_size - 2*HEADER_SIZE;
 	runner = (vsa_header_t*)(pool + 1);
 	
 	Defrag(pool);
@@ -152,8 +151,8 @@ size_t VSALargestBlockAvailble(vsa_t *pool)
 			max = runner->block_size;
 		}
 		
-		end -= (labs(runner->block_size) + WORD_SIZE);
-		runner += (labs(runner->block_size) / WORD_SIZE + 1);
+		end -= (labs(runner->block_size) + HEADER_SIZE);
+		runner += (labs(runner->block_size) / HEADER_SIZE + 1);
 	}
 	return max;
 }

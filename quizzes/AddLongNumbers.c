@@ -24,6 +24,7 @@ void AddLongNumbers(const char *num1, const char *num2, char *output)
 	j = strlen(num2) - 1;
 	t = (i > j) ? i : j;	/* t = max(i, j) */
 	++t;
+	
 	while( i >= 0 && j >= 0 )
 	{
 		output[t] = (((carie + num1[i] + num2[j]) - 2 * '0') % 10) + '0';
@@ -36,7 +37,7 @@ void AddLongNumbers(const char *num1, const char *num2, char *output)
 		for( ; i >= 0; --i, --t)
 		{
 			output[t] = (((carie + num1[i]) - '0') % 10) + '0';
-			carie = (int)((carie + num1[i]) - '0') / 10;
+			carie = ((carie + num1[i]) - '0') / 10;
 		}
 	}
 	
@@ -45,7 +46,7 @@ void AddLongNumbers(const char *num1, const char *num2, char *output)
 		for( ; j >= 0; --j, --t)
 		{
 			output[t] = (((carie + num2[j]) - '0') % 10) + '0';
-			carie = (int)((carie + num2[j]) - '0') / 10;
+			carie = ((carie + num2[j]) - '0') / 10;
 		}
 	}
 	
