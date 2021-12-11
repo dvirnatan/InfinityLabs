@@ -2,6 +2,8 @@
 #define WS_6
 
 #include <stdio.h> /* printf in tester */
+#include <stddef.h>
+#include <stdlib.h>
 
 unsigned int AddOne (unsigned int n);
 long Pow2(unsigned int x, unsigned int y);
@@ -13,11 +15,10 @@ unsigned char TwoOrSixAreOn (unsigned char c) ;
 unsigned char SwapThreeAndFive (unsigned char c);
 unsigned char MirrorLoop (unsigned char v);
 unsigned char Mirror (unsigned char v);
-unsigned char SixTeen (unsigned char v);
+unsigned int SixTeen (unsigned int v);
 void Swap (unsigned int *a, unsigned int *b);
 unsigned int CountSetBitsLoop(unsigned int v);
-unsigned int CountSetBitsNoLoop (unsigned int v);
-size_t CountSetBitsNoLoop2(unsigned int i);
+size_t CountSetBitsNoLoop(unsigned int i);
 void PrintFloat(float num);
 
 #endif /* WS6_H */

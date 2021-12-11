@@ -85,8 +85,6 @@ int CountingSort(int *array, size_t size)
 }
 
 
-
-
 int RadixSort(int *array, size_t size)
 {
 	int max, i  = 0, digit_place = 1;
@@ -139,7 +137,6 @@ int RadixSort(int *array, size_t size)
 	
 	return 0;
 }
-
 
 
 void BubbleSort(int *array,size_t size)
@@ -228,22 +225,11 @@ int main ()
 		array[i] = rand() % 100;
 		++i;
 	}
-	/*
-	j = 19;
-	while(i < 20)
-	{
-		array[i] = j;
-		i++;
-		j--; 
-	}
-	*/
+
 	printArr(array, size);
 	
 	start_t = clock();	
 	
-	/*InsertionSort(array, 5000); 
-	qsort(array, 5000, sizeof(int), &CmpFunc);*/
-	/*ret = CountingSort(array, 20);*/
 	RadixSort(array, size);
 	
 	end_t = clock();
@@ -256,4 +242,5 @@ int main ()
 	
 	return 0;
 }
+
 

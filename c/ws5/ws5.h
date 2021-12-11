@@ -1,14 +1,16 @@
 #ifndef WS_5
 #define WS_5
 
+#define UNUSED(x) (void)x
 #define MAX_STR 256
 
 #include <stdio.h> /*FILE*/
-#include <string.h>
+#include <string.h> /*strcmp */
 #include <stdlib.h> /*exit*/
-#include <assert.h>
+#include <assert.h>/*assert*/
 
-void Logger ();
+void Logger (int argc, char *file_name);
+void Print(int a);
 
 
 static const char RemoveN[] = "-remove\n";

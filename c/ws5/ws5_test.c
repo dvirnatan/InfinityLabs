@@ -1,8 +1,8 @@
 #include "ws5.h"
 
-int main ()
+int main (int argc, char **argv)
 {
 
-	Logger ();
+	Logger (argc, argv[1]);
 	return 0;
 }

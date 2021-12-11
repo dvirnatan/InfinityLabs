@@ -24,6 +24,10 @@ long int AtoiBase10(const char *nptr)
 		++ptr;
 		sign_flag = -1;
 	}
+		if ( *ptr == 43 )	/* '+' = 43 */
+	{
+		++ptr;
+	}
 	while ( *ptr != '\0' && *ptr > 47 && *ptr < 58)
 	{
 		res += *ptr - 48;	/* '0' = 48 */
@@ -60,6 +64,11 @@ long int Atoi(const char *nptr, int base)
 		++ptr;
 		sign = -1;
 	}
+	if ( *ptr == 43 )	/* '+' = 43 */
+	{
+		++ptr;
+	}
+	
 	while ( *ptr != '\0' && ( isdigit(ptr[i]) || isalpha(ptr[i]) ))
 	{
 		if (isdigit(ptr[i]))
@@ -90,6 +99,10 @@ long int Atoi(const char *nptr, int base)
 	{		
 		res += arr[i] * pow(base,n); 	
 	}
+	
+	free(arr);
+	arr = NULL;
+	
 	return res * sign;
 }
 
@@ -100,11 +113,23 @@ char *ItoaBase10(int n, char *buffer)
 	int base = 10;
 	int i = 0;
 	int j = 0;
+	int negativ = 0;
 	char temp;
+	
+	if ( n < 0 )
+	{
+		n *= -1;
+		negativ  = 1 ;
+	}
 	while ( n > 0 )
 	{
 		buffer[i] = (n % base) + 48; /* '0' = 48 */
 		n /= base;
+		++i;
+	}
+	if( negativ )
+	{
+		buffer[i] = '-';
 		++i;
 	}
 	buffer[i] = '\0';
@@ -125,41 +150,52 @@ char *Itoa(long int n, char *buffer, int base)
 {
 	char *buffer_r;
 	size_t *carie;
-	size_t res = n;
+	size_t *carie_r;
+	long int res = n;
 	int counter = 0;
 
-	carie =(size_t*)malloc(sizeof(int) * 10000); 
-	buffer =(char*)malloc(sizeof(char) * 10000); 
+	carie = (size_t*)malloc(sizeof(int) * 80); 
+	carie_r = carie;
 	buffer_r = buffer;
+	
+	if (res < 0)
+	{
+		res *= -1;
+		*buffer_r = '-';
+		++buffer_r;
+	}
 /*---------- Convert Base ----------*/
 		
 		while ( res > 0 )
 		{
 			
-			*carie = res % base;
+			*carie_r = res % base;
 			res /= base;
-			++carie;
+			++carie_r;
 			++counter;
 		}
-		--carie;
+		--carie_r;
 /*---------- Convert To String ----------*/
 		while ( counter > 0 )
 		{
-			if( *carie < 10 )
+			if( *carie_r < 10 )
 			{
-				*buffer_r = *carie + 48;
+				*buffer_r = *carie_r + 48;
 			}
 			else 
 			{
-				*buffer_r = *carie + 87;
+				*buffer_r = *carie_r + 87;
 			} 
-			--carie;
+			--carie_r;
 			++buffer_r;
 			--counter;
 		}
 		*buffer_r = '\0'; 
 		
-		return buffer;
+	free(carie);
+	carie = NULL;
+	
+	return buffer;
 }
 /*---------------------------------------------------------------------------*/	
 	
@@ -169,7 +205,7 @@ char *c, size_t len_c)
 	char *abc; 
 	size_t i = 0;
 	
-	abc = (char*)calloc(127, sizeof(char));
+	abc = (char*)calloc(128, sizeof(char));
 	
 	for( i = 0; i < len_a; ++i)
 	{
@@ -191,6 +227,9 @@ char *c, size_t len_c)
 		}
 	}
 	printf("\n");
+	
+	free(abc);
+	abc = NULL;
 }
 
 /*---------------------------------------------------------------------------*/

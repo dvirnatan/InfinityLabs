@@ -218,7 +218,7 @@ dllist_iter_t DLListFind(void *data, dllist_iter_t from, dllist_iter_t to,
 		}
 		from = DLListNext(from);
 	}
-	return from;
+	return to;
 }
 
 int DLListMultiFind(const void *data, dllist_t *dest, 

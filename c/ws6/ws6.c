@@ -17,6 +17,7 @@ long Pow2(unsigned int x, unsigned int y)
 size_t IfPow2Loop (unsigned int n)
 {
 	unsigned c = 0;
+	
 	for (c = 0; n; ++c)
 	{
 		n &= n - 1;
@@ -34,8 +35,10 @@ size_t IfPow2Loop (unsigned int n)
 size_t IfPow2 (unsigned int n)
 {
 	unsigned c = (n - 1);
+	
 	if (n & c)
 		return 0;
+		
 	return 1;
 }
 
@@ -44,6 +47,7 @@ unsigned int AddOne (unsigned int n)
 	unsigned c, res, temp;
 	c = 0;
 	res = temp = 1;
+	
 	if ((n & temp) == 0) /* n - even */
 	{
 		n = n | temp;
@@ -63,13 +67,15 @@ unsigned int AddOne (unsigned int n)
 		temp = temp << c;
 		n = n & temp;
 	}
+	
 	return n;
 }
 
 void ThreeBitsOn (unsigned int *arr, unsigned int len)
 {
-	unsigned char i, c, v;
+	unsigned int i, c, v;
 	i = c = v = 0;
+	
 	for (i = 0; i < len; ++i)
 	{
 		v = arr[i];
@@ -88,9 +94,11 @@ unsigned char TwoAndSixAreOn (unsigned char c)
 {
 	unsigned char v1 = 4;
 	unsigned char v2 = 64;
+	
 	v1 &= c;
 	v2 &= c;
 	c = (v1 && v2);
+	
 	return c;
 }
 
@@ -98,9 +106,11 @@ unsigned char TwoOrSixAreOn (unsigned char c)
 {
 	unsigned char v1 = 4;
 	unsigned char v2 = 64;
+	
 	v1 &= c;
 	v2 &= c;
 	c = (v1 || v2);
+	
 	return c;
 }
 
@@ -108,6 +118,7 @@ unsigned char SwapThreeAndFive (unsigned char c)
 {
 	unsigned char v1 = 8;
 	unsigned char v2 = 32;
+	
 	v1 &= c;
 	v2 &= c;
 	v1 <<= 2;
@@ -125,98 +136,30 @@ unsigned char MirrorLoop (unsigned char v)
 {
 	size_t i = 0;
 	unsigned char res = 0;
+	
 	for(i = 0; i < 8; ++i)
      		res |= ((v >> i) & 1) << (7 - i);
+     		
      	return res;
 }
 
-unsigned char Mirror (unsigned char v)
+unsigned char Mirror(unsigned char num)
 {
-	unsigned char m = 15;		/* 0000 1111 */
-	unsigned char v1, v2;
-	v2 = v1 = v;			/* 0100 1110 */
-					/* **** ---- */
-	v1 &= m; 			/* 0000 1110 */
-	m <<= 4;			/* 1111 0000 */
-	v2 &= m;			/* 0100 0000 */
-	v1 <<= 4;			/* 1110 0000 */
-	v2 >>= 4;			/* 0000 0100 */
-	v = (v1 | v2);			/* 1110 0100 */
-	v2 = v1 = v;
-					/*      **-- */
-	m = 3;				/* 0000 0011 */
-	v1 &= m;			/* 0000 0000 */
-	m <<= 2;			/* 0000 1100 */
-	v2 &= m;			/* 0000 0100 */
-	v1 <<= 2;			/* 0000 0000 */
-	v2 >>= 2;			/* 0000 0001 */
-	v1 |= v2;			/* 0000 0001 */
-	m = 240;			/* 1111 0000 */
-	v &= m;				/* 1110 0000 */
-	v |= v1;			/* 1110 0001 */
-	v2 = v1 = v; 			
-	m = 48;				/* 0011 0000 */
-	v1 &= m;			/* 0010 0000 */
-	m <<= 2;			/* 1100 0000 */
-	v2 &= m;			/* 1100 0000 */
-	v1 <<= 2;			/* 1000 0000 */
-	v2 >>= 2;			/* 0011 0000 */
-	v1 |= v2;			/* 1011 0000 */
-	m = 15;				/* 0000 1111 */
-	v &= m;				/* 0000 0001 */
-	v |= v1;			/* 1011 0001 */
-	v2 = v1 = v;
-	m  = 1;				/* 0000 0001 */
-	v1 &= m;			/* 0000 0001 */
-	m <<= 1;			/* 0000 0010 */
-	v2 &= m;			/* 0000 0000 */
-	v1 <<= 1;			/* 0000 0010 */
-	v2 >>= 1;			/* 0000 0000 */
-	v1 |= v2;			/* 0000 0010 */
-	m = 252;			/* 1111 1100 */
-	v &= m;				/* 1011 0000 */
-	v |= v1;			/* 1011 0010 */
-	v2 = v1 = v;
-	m  = 4;				/* 0000 0100 */
-	v1 &= m;			/* 0000 0000 */
-	m <<= 1;			/* 0000 1000 */
-	v2 &= m;			/* 0000 0000 */
-	v1 <<= 1;			/* 0000 0000 */
-	v2 >>= 1;			/* 0000 0000 */
-	v1 |= v2;			/* 0000 0000 */
-	m = 243;			/* 1111 0011 */
-	v &= m;				/* 1011 0010 */
-	v |= v1;			/* 1011 0010 */
-	v2 = v1 = v;
-	m  = 16;			/* 0001 0000 */
-	v1 &= m;			/* 0001 0000 */
-	m <<= 1;			/* 0010 0000 */
-	v2 &= m;			/* 0010 0000 */
-	v1 <<= 1;			/* 0010 0000 */
-	v2 >>= 1;			/* 0001 0000 */
-	v1 |= v2;			/* 0011 0000 */
-	m = 207;			/* 1100 1111 */
-	v &= m;				/* 1000 0010 */
-	v |= v1;			/* 1011 0010 */
-	v2 = v1 = v;
-	m  = 64;			/* 0100 0000 */
-	v1 &= m;			/* 0000 0000 */
-	m <<= 1;			/* 1000 0000 */
-	v2 &= m;			/* 1000 0000 */
-	v1 <<= 1;			/* 0000 0000 */
-	v2 >>= 1;			/* 0100 0000 */
-	v1 |= v2;			/* 0100 0000 */
-	m = 63;				/* 0011 1111 */
-	v &= m;				/* 0011 0010 */
-	v |= v1;			/* 0111 0010 */
-	v2 = v1 = v;
+	unsigned char half = 15; /*00001111*/
+	unsigned char quarter = 51; /*00110011*/
+	unsigned char eighth = 85; /*01010101*/
 	
-	return v;
+	num = ((num << 4) & half << 4) | ((num >> 4) & half);
+	num = ((num << 2) & quarter << 2) | ((num >> 2) & quarter);
+	num = ((num << 1) & eighth << 1) | ((num >> 1) & eighth);
+	
+	return num;	
 }
 
-unsigned char SixTeen (unsigned char v)
+unsigned int SixTeen (unsigned char v)
 {
-	unsigned char m = 240;
+	unsigned int m = ~15;
+	
 	v &= m;
 	return v;
 }
@@ -231,21 +174,17 @@ void Swap (unsigned int *a, unsigned int *b)
 unsigned int CountSetBitsLoop(unsigned int v)
 {
 	unsigned int count = 0;
+	
 	while (v) 
 	{
 		v = v & (v - 1);
 		++count;
 	}
+	
 	return count;
 }
 
-
-unsigned int CountSetBitsNoLoop (unsigned int v)
-{
-	return __builtin_popcount(v);
-}
-
-size_t CountSetBitsNoLoop2 (unsigned int i) 
+size_t CountSetBitsNoLoop (unsigned int i) 
 {
     i = i - ((i >> 1) & 0x55555555);
     i = (i & 0x33333333) + ((i >> 2) & 0x33333333);

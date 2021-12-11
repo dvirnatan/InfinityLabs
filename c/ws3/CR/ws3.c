@@ -1,4 +1,10 @@
-#include <stddef.h> /*size_t*/
+/**************************************************
+*	Writer: Or Shoham
+*	Reviewer: Dvir Natan
+*	Date: 17/09
+*
+**************************************************/
+
 #include <stdlib.h> /*malloc()*/
 #include <string.h> /*strlen()*/
 #include <ctype.h> /*tolower()*/
@@ -78,6 +84,17 @@ void FreeAllPtrs(char **new_env_array, size_t size)
 	}
 }
 
+void Envp(char *envp[])
+{
+	size_t env_size = CheckEnvSize(envp);
+	char **new_env_array = (char **) malloc( env_size * sizeof(char *));
+	
+	CopyAllStrings(envp, new_env_array, env_size);
+	FreeAllPtrs(new_env_array, env_size);
+	free(new_env_array);
+}
+
+
 /*JOSEPHUS PROBLEM*/
 /*Creates a circle of living soldiers. 1 is a living soldier. 0 is a dead one*/
 void MakeCircle(int *arr, size_t size)
@@ -139,6 +156,17 @@ int *PlayGame(int *arr, size_t size)
 	return sword_holder;
 }
 
+void Josephus()
+{
+	size_t soldier_amount = 100;
+	int *winner;
+	int *soldiers = calloc(soldier_amount, sizeof(int));
+	
+	MakeCircle(soldiers, soldier_amount);
+	winner = PlayGame(soldiers, soldier_amount);
+	printf("The Flavius winner is person number %lu", winner - soldiers + 1);
+	free(soldiers);
+}
 
 
 

@@ -1,13 +1,7 @@
-#include <stddef.h>
-#include <stdio.h>
-#include <stdlib.h>
-
 #include "ws6.h"
 
 int main()
 {
-
-
 	unsigned int var1 = 3, var2 = 2;
 	unsigned int var3 = 1;
 	unsigned int var4 = 21;
@@ -28,7 +22,7 @@ int main()
 	size_t check_pow2;
 	unsigned int add_1;
 	size_t pow2_loop;
-	unsigned int arr[]={66,290,38,35,7};
+	unsigned int arr[]={515,290,38,35,515};
 	int bit6_and_bit2;
 	int bit6_or_bit2;
 	int miror_loop;

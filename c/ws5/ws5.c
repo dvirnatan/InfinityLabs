@@ -1,3 +1,9 @@
+/********************************************************
+*	Author: Dvir Natan
+*	Status: Approved
+*	Reviwer:Matan
+*	Date: 22/09/21
+**********************************************************/
 #include "ws5.h"
 
 #define MAX_STR 256
@@ -42,44 +48,44 @@ void PrintMe()
 }
 
 
-int CmpFuncRemove (const char *string_u, const char *cmd_name) 
+static int CmpFuncRemove (const char *string_u, const char *cmd_name) 
 {
 	return (strcmp (string_u, cmd_name));
 }
 
-int CmpFuncCount (const char *string_u, const char *cmd_name) 
+static int CmpFuncCount (const char *string_u, const char *cmd_name) 
 {
 	return (strcmp (string_u, cmd_name));
 }
 	
-int CmpFuncExit (const char *string_u, const char *cmd_name) 
+static int CmpFuncExit (const char *string_u, const char *cmd_name) 
 {
 	return (strcmp (string_u, cmd_name));
 }
 
-int CmpFuncPrepend (const char *string_u, const char *cmd_name) 
+static int CmpFuncPrepend (const char *string_u, const char *cmd_name) 
 {
 	return (strncmp (string_u, cmd_name, 1));
 }
 
-int CmpFuncDef (const char *string_u, const char *cmd_name) 
+static int CmpFuncDef (const char *string_u, const char *cmd_name) 
 {
-	(void)string_u;
-	(void)cmd_name;
+	UNUSED(string_u);
+	UNUSED(cmd_name);
 	return Success;
 }
 
-int RemoveFunc(char *string_u)
+static int RemoveFunc(char *string_u, char *file_name)
 {
-	(void)string_u;
-	remove("Logger.txt");
+	UNUSED(string_u);
+	remove(file_name);
 	return Success;
 }
 
-int CountFunc(char *string_u)
+static int CountFunc(char *string_u, char *file_name)
 {
 	
-	FILE *fp = fopen("Logger.txt", "r");
+	FILE *fp = fopen(file_name, "r");
 	int ch ;
 	int lines = 0;
 	(void) string_u;
@@ -94,7 +100,6 @@ int CountFunc(char *string_u)
 	{
 		while ((ch = fgetc(fp)) != EOF)
 		{
-
 			if (ch == '\n')
 			{
 				++lines;
@@ -109,21 +114,23 @@ int CountFunc(char *string_u)
 }
 
 
-int ExitFunc(char *string_u)
+static int ExitFunc(char *string_u, char *file_name)
 {
 	(void)string_u;
+	(void)file_name;
 	exit_flag = 1;
 	return Success;
 }
 
 
-int Prepend(char *string_u)
+static int Prepend(char *string_u, char *file_name)
 {
 	int c;
-	FILE *fp = fopen("Logger.txt", "r+");
+	FILE *fp = fopen(file_name, "r+");
 	FILE *tmp_f = fopen("tmp.txt", "a+");
 	fputs(++string_u ,tmp_f); 
 	c = fgetc(fp);
+	
 	while (c != EOF)
 	{
 		fputc(c, tmp_f);
@@ -132,7 +139,6 @@ int Prepend(char *string_u)
 	
 	fseek(fp, 0, SEEK_SET);
 	fseek(tmp_f, 0, SEEK_SET);
-	
 	
 	while ((c = fgetc(tmp_f)) != EOF)
 	{
@@ -145,10 +151,9 @@ int Prepend(char *string_u)
 	return Success;
 }
 
-
-int DefFunc (char *string_u)
+static int DefFunc (char *string_u, char *file_name)
 {
-        FILE *fp = fopen("Logger.txt", "a+");
+        FILE *fp = fopen(file_name, "a+");
 	if (NULL == fp)
 	{
 		return Failed;
@@ -158,24 +163,33 @@ int DefFunc (char *string_u)
 	fclose(fp);
 	return Success;
 }
-	
-	
-void Logger ()
+		
+void Logger (int argc, char *file_name)
 {
+	
 	size_t i = 0;
-	char string_u[MAX_STR] = {'\0'};
+	char *string_u;
 	
 	typedef int(*cmp_ptr)(const char *s1, const char *s2);
-	typedef int(*op_ptr)( char *string_u);
-	
+	typedef int(*op_ptr)( char *string_u, char *file_name);
 	typedef struct chain 
 	{
 		const char *cmd_name;
 		cmp_ptr cmp_func;
 		op_ptr op_func;
 	} chain_t;
-	
+
 	chain_t chain_arr[5];
+	
+	if (argc != 2)
+	{
+		printf("File name not entered correctly\n");
+		return;
+	}
+	
+	
+	
+	string_u = malloc(MAX_STR * sizeof(char));
 	
 	chain_arr[0].op_func = &RemoveFunc;
 	chain_arr[0].cmd_name = RemoveN;
@@ -196,18 +210,16 @@ void Logger ()
 	chain_arr[4].op_func = &DefFunc;
 	chain_arr[4].cmd_name = NULL;
 	chain_arr[4].cmp_func = &CmpFuncDef;
-
-	  
+  
 	while(!exit_flag) 
-	{	
-		
+	{		
 		fgets(string_u, MAX_STR, stdin);
 		found_flag = 1;	
 		for (i = 0; i < 5 && (found_flag); ++i)
 		{		
 			if(0 == (chain_arr[i].cmp_func(string_u, chain_arr[i].cmd_name)))
 			{
-				found_flag = chain_arr[i].op_func(string_u);
+				found_flag = chain_arr[i].op_func(string_u, file_name);
 			}
 		}
 	}
