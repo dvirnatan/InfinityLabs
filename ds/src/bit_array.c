@@ -17,7 +17,7 @@ bit_arr_t SetBitOn(bit_arr_t arr, size_t index)
 {
 	bit_arr_t mask = 1;
 	
-	assert( ARR_LEN > index );
+	assert(ARR_LEN > index);
 	
 	mask <<= index;
 	arr |= mask;
