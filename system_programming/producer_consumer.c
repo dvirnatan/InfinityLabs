@@ -7,7 +7,6 @@
 #include <stdlib.h>
 #include <pthread.h>
 
-
 #define MAX_LEN 80
 #define SIZE 50
 
@@ -27,6 +26,10 @@ pthread_mutex_t fsq_mutex2 = PTHREAD_MUTEX_INITIALIZER;
 
 sem_t sem_cons_ex4, sem_prod_ex4;
 size_t not_full;
+
+sem_t sem_ex6;
+pthread_cond_t cond_var_ex6;
+pthread_mutex_t mutex_ex6 = PTHREAD_MUTEX_INITIALIZER;
 
 
 void *reader_func (void *buffer)
@@ -180,7 +183,6 @@ void *produce_ex5(void *queue)
 
     return NULL;
 }
-
 void *comsume_ex5(void *queue)
 {
     int *pt_queue = queue;
@@ -197,6 +199,49 @@ void *comsume_ex5(void *queue)
     return NULL;
 }
 
+int counter;
+#define NUM_OF_THREADS_EX6 10
+void *produce_ex6(void *buffer)
+{
+    int i = NUM_OF_THREADS_EX6;
+    char *pt_buffer = buffer;
+    while(1)
+    {
+        while(counter < NUM_OF_THREADS_EX6)
+        {
+            pthread_cond_wait(&cond_var_ex6, &mutex_ex6);
+        }
+        counter = 0;
+        fgets(pt_buffer, MAX_LEN, stdin);
+        puts("-------");
+        i = NUM_OF_THREADS_EX6;
+        while(i > 0)
+        {
+            sem_post(&sem_ex6);
+            --i;
+        }
+    }
+    return NULL;
+}
+
+void *consumer_ex6(void *buffer)
+{
+    char *pt_buffer = buffer;
+    while(1)
+    {
+        sem_wait(&sem_ex6);
+        
+        pthread_mutex_lock(&mutex_ex6);
+        printf("%d: %s",counter ,pt_buffer);
+        ++counter;
+        pthread_mutex_unlock(&mutex_ex6);
+        if(counter == NUM_OF_THREADS_EX6)
+        {
+            pthread_cond_signal(&cond_var_ex6);
+        }
+    }
+    return NULL;
+}
 
 void EX1()
 {
@@ -303,13 +348,46 @@ void EX5()
     printf("num of thread is: %d\n", counter/2);
 }
 
+
+void EX6()
+{
+    size_t i = 0;
+    char buffer[MAX_LEN] = {0};
+    pthread_t producer;
+    pthread_t consumer[NUM_OF_THREADS_EX6];
+
+    pthread_cond_init(&cond_var_ex6, NULL);
+    sem_init(&sem_ex6, 0, 0);
+
+    pthread_create(&producer, NULL, &produce_ex6, (void*)buffer);
+    for(i = 0; i < NUM_OF_THREADS_EX6; ++i)
+    {
+        pthread_create(&consumer[i], NULL, &consumer_ex6, (void*)buffer);
+    }
+    counter = NUM_OF_THREADS_EX6;
+    pthread_cond_signal(&cond_var_ex6);
+
+    pthread_join(producer, NULL);
+    for(i = 0; i < NUM_OF_THREADS_EX6; ++i)
+    {
+        pthread_join(consumer[i], NULL);
+    }
+
+    pthread_cond_destroy(&cond_var_ex6);
+    sem_destroy(&sem_ex6);
+    pthread_mutex_destroy(&mutex_ex6);
+
+}
+
 int main()
 {
-    /*EX1();*/
-   /* EX2(); */
-    /*EX3();*/
-   /* EX4(); */
-    EX5(); 
+    /* EX1(); */
+    /* EX2(); */
+    /* EX3(); */
+    /* EX4(); */
+    /* EX5(); */
+    EX6();
+
 
     return 0;
 }
