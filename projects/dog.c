@@ -1,4 +1,5 @@
-/*gd -pthread dog.c -o dog.out*/
+/*gd dog.c ../ds/src/scheduler.c ../ds/src/pqueue.c ../ds/src/sllist.c ../ds/src/task.c ../ds/src/uid.c ../ds/src/sorted_list.c ../ds/src/dllist.c -o dog.out -I ../ds/include -pthread
+*/
 #define _POSIX_SOURCE
 
 #include <signal.h>
@@ -9,125 +10,101 @@
 #include <stdlib.h> /*abort*/
 #include <pthread.h>
 
-void Siguser1Hndler(int signal);
-void *Watch(void *args);
-void *SendSignals(void *args);
+#include "scheduler.h"
+
+void Siguser1Handler(int signal);
+void Siguser2Handler(int signal);
+int Watch(void *args);
+int SendSignals(void *args);
+int DoDNR(void *sched);
 int RestartUserProgram(void *args);
 
-enum{EXEC_FAILED = -2, FORK_FAILED = -1};
-
-typedef struct args args_t;
-
-struct args
+enum 
 {
-    int argc;
-    char **argv; /* needs to get a ready to exec argv from MMI */
-    int ratio;
-    time_t sig_freq;
-    unsigned int num_of_retries;
+	SUCCESS = 0, 
+	FORK_FAILED = -1, 
+	EXEC_FAILED = -2,
+	PTHREAD_CREATE_FAILED = -3,
+    MALLOC_FAILED = -4
 };
 
-sig_atomic_t signal_1_recived;
-void Siguser1Hndler(int signal) 
-{
-    signal_1_recived = (signal == SIGUSR1);
-}
 
-int main(int argc, char *argv[]) /* arguments were recived from exec (MMI) */
-                                /* argc is the number of arg for user_prog + 3 arg for MMI */
+sig_atomic_t siguser1_recived;
+sig_atomic_t DNR_flag = 1;
+unsigned int num_of_retries;
+
+
+int main(int argc, char *argv[])                             
 {
-    struct sigaction siguser1;
-    pthread_t thread_watch, thread_send;
-    args_t *args = malloc(sizeof(args_t)); /* TODO: free() */
-    puts("dog was created");
-    if(args)
-    {
-        args->argv = argv;
-        args->argc = argc;
-        args->ratio = *argv[argc + 1];
-        args->sig_freq = *argv[argc + 2];
-        args->num_of_retries = *argv[argc + 3];
-    }
-    else
-    {
-        puts("malloc failed in dog");
-        abort();
-    }
+    struct sigaction siguser1, siguser2;
+    sched_t *sched = NULL;
+    int ratio = 0;
+    time_t sig_freq = 0;
+    (void)argc;
+
+    ratio = strtol(argv[1], NULL, 10);
+    sig_freq = strtol(argv[2], NULL, 10);
+    num_of_retries = strtol(argv[3], NULL, 10);
 
     memset(&siguser1, 0, sizeof(siguser1));
-    siguser1.sa_handler = &Siguser1Hndler;
+    siguser1.sa_handler = &Siguser1Handler;
     sigaction(SIGUSR1, &siguser1, NULL);
 
-    pthread_create(&thread_watch, NULL, &Watch, (void*)args); 
-    pthread_create(&thread_send, NULL, &SendSignals, (void*)args); 
+    memset(&siguser2, 0, sizeof(siguser2));
+    siguser2.sa_handler = &Siguser2Handler;
+    sigaction(SIGUSR2, &siguser2, NULL);
 
-    pthread_join(thread_watch, NULL); 
-    pthread_join(thread_send, NULL);  
-    
-    puts("HO HO you are not supposed to be here");
+    sched = SchedCreate();
+    SchedAddTask(sched, 0, sig_freq, SendSignals, argv);
+    SchedAddTask(sched, 1, sig_freq/2, DoDNR, sched);
+    SchedAddTask(sched, ratio, sig_freq * ratio, Watch, argv);
+    SchedRun(sched);
+    SchedDestroy(sched);
+
     return 0;
 }
 
-void *Watch(void *args)
+int Watch(void *args)
 {
-    args_t *pt_args = args;
-    size_t interval = pt_args->ratio * pt_args->sig_freq; 
-    size_t num_of_retries = pt_args->num_of_retries;
-    size_t i = 0;
-
-    printf("interval = %d, num_of_retries = %ld, ratio = %d/n", interval, num_of_retries, pt_args->ratio);
-
-    puts("Watch started");
-    while(1)
-    {
-        while(i < 2)
-        {
-            sleep(1);
-            ++i;
-        }
-        if(signal_1_recived == 0)
-        {  
-            puts("signal not recived");
-            printf("%ld\n", num_of_retries);
-            --num_of_retries;
-            if(!num_of_retries)
-            {
-                RestartUserProgram(args);
-            }
-        }
-        else
-        {
-            signal_1_recived = 0;
-            num_of_retries = pt_args->num_of_retries;
-        }
-        i = 0;
+    if(siguser1_recived)
+    {  
+        siguser1_recived = 0;
+        return 0;
     }
-    puts("returned from thread Watch");
-    return NULL; /* TODO: not sure about it */
+    puts("signal not recived RestartUserProgram");
+    return RestartUserProgram(args);
 }
 
-void *SendSignals(void *args) /* needs freq, pid it known */
+void Siguser1Handler(int signal) 
 {
-    pid_t ppid;
-    args_t *pt_args = args;
-    long i = 0;
-    ppid = getppid();
-    while(1)
-    {
-        for(i = 0; i < pt_args->sig_freq; ++i)
-        {
-            sleep(1);
-        }
-        kill(ppid, SIGUSR2);
-    }
-    return NULL;
+    siguser1_recived = (signal == SIGUSR1);
 }
 
+void Siguser2Handler(int signal)
+{
+    DNR_flag = !(signal == SIGUSR2);
+}
+
+int SendSignals(void *args) 
+{
+    (void)args;
+    kill(getppid(), SIGUSR1);
+    return 0;
+}
+
+int DoDNR(void *sched)
+{
+    if(!DNR_flag)
+    {
+        SchedStop((sched_t*)sched);
+    }
+    return 0;
+}
 
 int RestartUserProgram(void *args) 
 {
-    args_t *pt_args = args;
-    execvp("./user_prog.out", pt_args->argv);
+    char **cast_args = ((char**)args + 3);
+    execvp(cast_args[0], cast_args);
     puts("exec by dog failed");
     return EXEC_FAILED;
 }

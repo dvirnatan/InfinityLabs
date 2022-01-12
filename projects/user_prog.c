@@ -6,7 +6,7 @@
 
 #include "watchdog.h"
 
-#define LINE_LEN 32 /* needs to be power of 2 */
+#define LINE_LEN 16 /* needs to be power of 2 */
 #define MASK (LINE_LEN - 1)
 
 int main(int argc, char *argv[])
@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
     int i = 0;
     int stop = 0;
 
-    MMI(argc, argv, 3, 1, 2);
+    MMI(argc, argv, 2, 1, 3);
 
     puts("STARTING");
     while(1)
@@ -38,7 +38,8 @@ int main(int argc, char *argv[])
             printf("\n");
         }
 
-        if(stop++ == 1000)
+    DNR();
+        if(stop++ == 5)
         {
             puts("EXITING PROGREM");
             return 1;

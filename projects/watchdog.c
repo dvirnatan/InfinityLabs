@@ -1,4 +1,8 @@
+/*
+gd user_prog.c watchdog.c ../ds/src/scheduler.c ../ds/src/pqueue.c ../ds/src/sllist.c ../ds/src/task.c ../ds/src/uid.c ../ds/src/sorted_list.c ../ds/src/dllist.c -o user_prog -I ../ds/include -pthread
+*/
 #define _POSIX_SOURCE
+# define NUM_OF_ARG 4
 #include <signal.h>
 #include <unistd.h> /*fork*/
 #include <sys/types.h>/*pid_t*/
@@ -8,150 +12,149 @@
 #include <sys/wait.h> /*wait*/
 #include <pthread.h>
 
-void *SendSignals(void *args);
-void *CheckSignalRecived(void *args);
-void Siguser1Hndler(int signal);
-static char **ArgListCreate(int argc, char *argv[],int ratio, time_t sig_freq, unsigned int num_of_retries);
+#include "scheduler.h"
 
-
-typedef struct args args_t;
-struct sigaction siguser2;
-
-struct args
+enum 
 {
-    int argc;
-    char **argv; /* needs to get a ready to exec argv from MMI */
-    int ratio;
-    time_t sig_freq;
-    unsigned int num_of_retries;
+	SUCCESS = 0, 
+	FORK_FAILED = -1, 
+	EXEC_FAILED = -2,
+	PTHREAD_CREATE_FAILED = -3,
+    MALLOC_FAILED = -4
 };
 
-sig_atomic_t signal_2_recived;
+int SendSignals(void *args);
+void *Dogwalker(void *args);
+void Siguser1Handler(int signal);
+void *DogSitter(void *args);
+int WatchTheDog(void *args);
+int DoDNR(void *sched);
+int RestartDogProgram(void *args);
+static char **ArgListCreate(int argc, char *argv[],int ratio, time_t sig_freq, unsigned int num_of_retries);
 
-void Siguser2Hndler(int signal) 
-{
-    signal_2_recived = (signal == SIGUSR2);
-}
-
+/**************** GLOBAL VAR *********************/
+sig_atomic_t siguser1_recived;
+sig_atomic_t DNR_flag = 1;
 pid_t child_pid;
+char *dog = "./dog.out";
+pthread_t dog_sitter_thread;
+
 int MMI(int argc, char *argv[], int ratio, time_t sig_freq, unsigned int num_of_retries)
 {
-    char *dog = "./dog.out";
-    pthread_t thread_sending_signals, thread_reciving_signals;
-    int i = 0;
-    int status = 0;
-    args_t *args;
+    struct sigaction siguser1;
     char **argv_to_exec;
 
     argv_to_exec = ArgListCreate(argc, argv, ratio, sig_freq, num_of_retries);
 
-    memset(&siguser2, 0, sizeof(siguser2));
-    siguser2.sa_handler = &Siguser2Hndler;
-    sigaction(SIGUSR2, &siguser2, NULL);
-
-/*
-    argv_to_exec = calloc((size_t)(argc + 4), sizeof(char *));
-    for(i = 0; i < argc; ++i)
-    {
-        argv_to_exec[i] = argv[i]; 
-    }
-
-    argv_to_exec[argc] = &c_ratio;
-    argv_to_exec[argc + 1] = &c_sig_freq;
-    argv_to_exec[argc + 2] = &c_num_of_retries;
-    argv_to_exec[argc + 3] = NULL;
-
-    printf("c: sig_Freq = %c, num_of_retries = %c, ratio = %c\n", c_sig_freq, c_num_of_retries, c_ratio);
-    for(i = 0; i < argc + 4; ++i)
-    {
-        printf("%d: %s\n",i,argv_to_exec[i]);
-    }
-*/
     child_pid = fork();
-    if(child_pid != 0) /* this is the watcdog pid */
+    if(child_pid > 0) /* this is the watcdog pid */
     {
-        args = malloc(sizeof(args_t)); /* TODO: free() */
-        if(!args)
+        memset(&siguser1, 0, sizeof(siguser1));
+        siguser1.sa_handler = &Siguser1Handler;
+        sigaction(SIGUSR1, &siguser1, NULL);
+        pause();
+        if(pthread_create(&dog_sitter_thread, NULL, &DogSitter, argv_to_exec))
         {
-            args->argv = argv_to_exec;
-            args->argc = argc;
-            args->ratio = ratio;
-            args->sig_freq = sig_freq;
-            args->num_of_retries = num_of_retries;
+            return PTHREAD_CREATE_FAILED;
         }
-        puts("thread creation");
-        pthread_create(&thread_sending_signals, NULL, SendSignals, (void*)args); /* send signals to dog every freq */
-        pthread_create(&thread_reciving_signals, NULL, CheckSignalRecived, (void*)args); /* check if signal recived from dog */
     }
-    else /* this will be the watchdog */
+    else 
     {
-        puts("dog creation");
+        if(child_pid == -1)
+        {
+            return FORK_FAILED;
+        }
+
         execvp(dog, argv_to_exec);
         puts("exec failed!");
-        abort();
+        return EXEC_FAILED;
     }
-    return status;
+    return SUCCESS;
 }
 
-void *SendSignals(void *args) /* needs freq, pid it known */
+int DNR()
 {
-    args_t *pt_args = args;
-    long i = 0;
-    while(1)
+    DNR_flag = 0;
+    kill(child_pid, SIGUSR2);
+    pthread_join(dog_sitter_thread, NULL);
+    return 0;
+}
+
+void *DogSitter(void *args) 
+{
+    size_t i = 0;
+    char **cast_args = args;
+    int ratio = (int)strtol(cast_args[1], NULL, 10);
+    time_t sig_freq = strtol(cast_args[2], NULL, 10);
+    sched_t *dog_sched = SchedCreate();
+
+    SchedAddTask(dog_sched, 0, sig_freq, SendSignals, NULL);
+    SchedAddTask(dog_sched, 1, (sig_freq / 2), DoDNR, dog_sched);
+    SchedAddTask(dog_sched, 2, (sig_freq * ratio), WatchTheDog, args);
+    SchedRun(dog_sched);
+
+    SchedDestroy(dog_sched);
+    for(i = 0; i < NUM_OF_ARG; ++i)
     {
-        for(i = 0; i < pt_args->sig_freq; ++i)
-        {
-            sleep(1);
-        }
-        kill(child_pid, SIGUSR1);
+        free(cast_args[i]);
     }
-    puts("send signal in watchdog returns");
+    free(args);
     return NULL;
 }
 
-void *CheckSignalRecived(void *args) /* needs: num_of_retries, freq, ratio */
+void Siguser1Handler(int signal) 
 {
-    args_t *pt_args = args;
-    size_t interval = pt_args->ratio * pt_args->sig_freq; /* TODO: get info from struct arg */  
-    size_t num_of_retries = pt_args->num_of_retries;
-    size_t i = 0;
-    pid_t pid_temp;
+    siguser1_recived = (signal == SIGUSR1);
+}
 
-    while(1)
-    {
-        while(i < interval)
-        {
-            sleep(1);
-            ++i;
-        }
-        if(!signal_2_recived)
-        {  
-            --num_of_retries;
-            if(!num_of_retries)
-            {
-                puts("not reciving signals from dog");
-                pid_temp = fork();
-                if(pid_temp != 0)
-                {
-                    kill(child_pid, SIGKILL);
-                    child_pid = pid_temp;
-                }
-                else
-                {
-                    execvp("dog.out", pt_args->argv);
-                    puts("exec failed!");
-                    abort();
-                }
-            }
-        }
-        i = 0;
+int SendSignals(void *args) 
+{
+    (void)args;
+    kill(child_pid, SIGUSR1);
+    return 0;
+}
+
+int WatchTheDog(void *args)
+{
+    if(siguser1_recived)
+    {  
+        siguser1_recived = 0;
+        return 0;
     }
-    return NULL; /* TODO: not sure about it */
+    puts("The Dog Is Dead, RestartDogProgram");
+    return RestartDogProgram(args);   
+}
+
+int RestartDogProgram(void *args)
+{
+    pid_t temp_pid;
+
+    temp_pid = fork();
+    if(temp_pid > 0)
+    {
+        kill(child_pid, SIGKILL);
+        child_pid = temp_pid;
+    }
+    else if(!temp_pid)
+    {
+        execvp(dog, (char**)args);
+        puts("exec failed in WatchDog!");
+        return EXEC_FAILED;
+    }
+    return SUCCESS;
+}
+
+int DoDNR(void *sched)
+{
+    if(!DNR_flag)
+    {
+        SchedStop((sched_t*)sched);
+    }
+    return 0;
 }
 
 static char **ArgListCreate(int argc, char *argv[],int ratio, time_t sig_freq, unsigned int num_of_retries)
 {
-# define NUM_OF_ARG 4
     char **arg_list = malloc(sizeof(char *) * (argc + NUM_OF_ARG));
 
     char *str_ratio = malloc(12);
