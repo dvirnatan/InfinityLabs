@@ -31,6 +31,7 @@ int WatchTheDog(void *args);
 int DoDNR(void *sched);
 int RestartDogProgram(void *args);
 static char **ArgListCreate(int argc, char *argv[],int ratio, time_t sig_freq, unsigned int num_of_retries);
+static void CleanUp(void **args);
 
 /**************** GLOBAL VAR *********************/
 sig_atomic_t siguser1_recived;
@@ -53,6 +54,7 @@ int MMI(int argc, char *argv[], int ratio, time_t sig_freq, unsigned int num_of_
         siguser1.sa_handler = &Siguser1Handler;
         sigaction(SIGUSR1, &siguser1, NULL);
         pause();
+     
         if(pthread_create(&dog_sitter_thread, NULL, &DogSitter, argv_to_exec))
         {
             return PTHREAD_CREATE_FAILED;
@@ -82,7 +84,6 @@ int DNR()
 
 void *DogSitter(void *args) 
 {
-    size_t i = 0;
     char **cast_args = args;
     int ratio = (int)strtol(cast_args[1], NULL, 10);
     time_t sig_freq = strtol(cast_args[2], NULL, 10);
@@ -90,15 +91,12 @@ void *DogSitter(void *args)
 
     SchedAddTask(dog_sched, 0, sig_freq, SendSignals, NULL);
     SchedAddTask(dog_sched, 1, (sig_freq / 2), DoDNR, dog_sched);
-    SchedAddTask(dog_sched, 2, (sig_freq * ratio), WatchTheDog, args);
+    SchedAddTask(dog_sched, ratio, (sig_freq * ratio), WatchTheDog, args);
     SchedRun(dog_sched);
 
     SchedDestroy(dog_sched);
-    for(i = 0; i < NUM_OF_ARG; ++i)
-    {
-        free(cast_args[i]);
-    }
-    free(args);
+    CleanUp(args);
+
     return NULL;
 }
 
@@ -175,3 +173,21 @@ static char **ArgListCreate(int argc, char *argv[],int ratio, time_t sig_freq, u
 
     return arg_list;
 }
+
+static void CleanUp(void **args)
+{
+    size_t i = 0;
+    char **temp = (char**)args;
+
+    for(i = 0; i < NUM_OF_ARG - 1; ++i)
+    {
+        free(temp[i]);
+    }
+    free(args);
+}
+/*
+static char **CreateArgv(int argc, char *argv[],int ratio, time_t sig_freq, unsigned int num_of_retries)
+{
+
+}
+*/

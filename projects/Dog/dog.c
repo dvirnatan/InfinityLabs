@@ -28,11 +28,9 @@ enum
     MALLOC_FAILED = -4
 };
 
-
 sig_atomic_t siguser1_recived;
 sig_atomic_t DNR_flag = 1;
 unsigned int num_of_retries;
-
 
 int main(int argc, char *argv[])                             
 {
@@ -42,6 +40,7 @@ int main(int argc, char *argv[])
     time_t sig_freq = 0;
     (void)argc;
 
+    puts("Dog Started");
     ratio = strtol(argv[1], NULL, 10);
     sig_freq = strtol(argv[2], NULL, 10);
     num_of_retries = strtol(argv[3], NULL, 10);
@@ -71,7 +70,7 @@ int Watch(void *args)
         siguser1_recived = 0;
         return 0;
     }
-    puts("signal not recived RestartUserProgram");
+    puts("\nsignal not recived RestartUserProgram");
     return RestartUserProgram(args);
 }
 
