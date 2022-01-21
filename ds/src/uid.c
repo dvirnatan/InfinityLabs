@@ -7,13 +7,17 @@
 
 
 #include "uid.h"
+#include <pthread.h>
+
+pthread_mutex_t mutex_to_protect_counter = PTHREAD_MUTEX_INITIALIZER;
 
 ilrd_uid_t UIDCreate(void)
 {
 	ilrd_uid_t uid;
 	static size_t counter = 0;
-	
+	pthread_mutex_lock(&mutex_to_protect_counter);
 	++counter;
+	pthread_mutex_unlock(&mutex_to_protect_counter);
 	uid.time_stamp = time(0);
 	uid.pid = getpid();
 	uid.counter = counter;

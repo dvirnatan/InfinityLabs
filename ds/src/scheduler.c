@@ -59,7 +59,7 @@ void SchedDestroy(sched_t *sched)
 {
 	assert(NULL != sched);
 	
-	SchedFlush(sched->pqueue);
+	SchedFlush(sched);
 	PQDestroy(sched->pqueue);
 	free(sched); sched = NULL;
 }
