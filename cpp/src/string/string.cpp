@@ -5,7 +5,7 @@ Status: Aprroved
 Date: 13.1.2022
 ***************************************/
 #include <ostream> // output stream
-#include <cstring> //strcmp , memecpy
+#include <cstring> //strcmp ,strlen, memecpy
 #include "string.hpp"
 
 static char *StrDup(const char* s)
