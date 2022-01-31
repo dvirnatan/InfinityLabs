@@ -1,28 +1,39 @@
-#include <iostream>
-#include <cstring>
+/**************************************
+Author: Dvir Natan
+Reviewer: Mickey Grab
+Status: Aprroved
+Date: 13.1.2022
+***************************************/
+#include <ostream> // output stream
+#include <cstring> //strcmp , memecpy
 #include "string.hpp"
 
 static char *StrDup(const char* s)
 {
 	size_t len = strlen(s);
-	char *m_cstr_ = new (std::nothrow) char[len + 1];
+	char *m_cstr_ = new char[len + 1];
 	memcpy(m_cstr_, s, len + 1);
 	return m_cstr_;
 }
 
-ilrd::String::String(const char *s_)
+namespace ilrd
 {
-	m_cstr = StrDup(s_);
+String::String(const char *s_) : m_cstr(StrDup(s_))
+{
+	// empty;
 }
 
-ilrd::String::~String() {delete[] m_cstr; m_cstr = 0;}
-
-ilrd::String::String(const String& other_)
+String::~String()
 {
-	m_cstr = StrDup(other_.Cstr());
+	delete[] m_cstr; m_cstr = 0;
 }
 
-ilrd::String& ilrd::String::operator=(const String& other_)
+String::String(const String& other_) : m_cstr(StrDup(other_.Cstr()))
+{
+	// empty;
+}
+
+String& String::operator=(const String& other_)
 {
 	delete [] m_cstr;
 	m_cstr = StrDup(other_.Cstr());
@@ -34,44 +45,30 @@ std::ostream& operator<<(std::ostream& os_, const ilrd::String& string_)
 	return os_ << string_.Cstr();
 }
 
-bool ilrd::operator==(const ilrd::String& one_, const ilrd::String& other_)
+bool operator==(const String& one_, const String& other_)
 {
-	return strcmp(one_.Cstr(), other_.Cstr());
+	return strcmp(one_.Cstr(), other_.Cstr()) == 0;
 }
 
-bool ilrd::operator<(const ilrd::String& one_, const ilrd::String& other_)
+bool operator<(const String& one_, const String& other_)
 {
 	return (strcmp(one_.Cstr(), other_.Cstr()) < 0);
 }
 
-bool ilrd::operator>(const ilrd::String& one_, const ilrd::String& other_)
+bool operator>(const String& one_, const String& other_)
 {
 	return (strcmp(one_.Cstr(), other_.Cstr()) > 0);
 }
 
-size_t ilrd::String::Length() const
+size_t String::Length() const
 {
 	return strlen(m_cstr);
 }
 
-const char *ilrd::String::Cstr() const
+const char *String::Cstr() const
 {
 	return m_cstr;
 }
 
-int main()
-{
-	ilrd::String s1("hello");
-
-	printf("%s\n", s1.ilrd::String::Cstr());
-	ilrd::String s2(s1);
-	std::cout << s2.ilrd::String::Cstr() << std::endl;
-
-	ilrd::String s3("ok");
-	std::cout << s3.ilrd::String::Cstr() << std::endl;	
-	s2 = s3;
-	std::cout << s2.ilrd::String::Cstr() << std::endl;
-	std::cout << (s1 == s3) << std::endl;	
-	
-	return 0;
-}
+}// namespace ilrd
+// _____________________EOF____________________
