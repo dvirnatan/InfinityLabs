@@ -103,4 +103,31 @@ namespace ilrd
 		return ret;
 	}
 
+	const Complex operator*(const Complex& lhs_, const Complex& rhs_)
+	{
+		double real = (lhs_.GetReal() * rhs_.GetReal()) - (lhs_.GetImaginary() * rhs_.GetImaginary());
+		double imaginary = (lhs_.GetReal() * rhs_.GetImaginary()) + (lhs_.GetImaginary() * rhs_.GetReal()); 
+		return Complex(real,imaginary);
+	}
+
+	const Complex operator/(const Complex& lhs_, const Complex& rhs_)
+	{
+		Complex conjugate(rhs_.GetReal(), -(rhs_.GetImaginary()));
+		Complex up(lhs_ * conjugate);
+		Complex down(rhs_ * conjugate);
+
+		Complex ret(up.GetReal() / down.GetReal(), up.GetImaginary() / down.GetReal());
+		return ret;
+	}
+
+	const Complex& Complex::operator*=(const Complex& other_)
+	{
+		return *this = *this * other_;
+	}
+
+	const Complex& Complex::operator/=(const Complex& other_)
+	{
+		return *this = *this / other_;
+	}
+
 }// namespace ilrd

@@ -25,8 +25,16 @@ int main()
 	c3 += c3;
 	Test(c3, 2, 1, __LINE__);
 
-	std::cin >> c1;
-	std::cout << c1;
+	// std::cin >> c1;
+	// std::cout << c1;
+
+	c1 = Complex(1, 2);
+	c2 = Complex(2, 4);
+	c3 = c1 * c2;
+	Test(c3, -6, 8, __LINE__);
+	c3 = c3 / c2;
+	Test(c3, 1, 2, __LINE__);
+
 }
 
 static void Test(const Complex& c, double e_real, double e_imaginary, int line)
