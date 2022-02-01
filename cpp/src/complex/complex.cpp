@@ -1,5 +1,12 @@
+/**************************************
+Author: Dvir Natan
+Reviewer: Or Shoam
+Status: Approved
+Date: 1.2.2022
+***************************************/
+#include <iostream> // output and input stream.
+
 #include "complex.hpp"
-#include <iostream>
 
 namespace ilrd
 {
@@ -20,27 +27,20 @@ namespace ilrd
 	
 	Complex& Complex::operator=(const Complex& other_)
 	{
-		m_real = other_.m_real;
-		m_imaginary = other_.m_imaginary;
+		SetReal(other_.GetReal());
+		SetImaginary(other_.GetImaginary());
 		return *this;
 	}
 
 	const Complex& Complex::operator+=(const Complex& other_)
 	{
-		m_real += other_.m_real;
-		m_imaginary += other_.m_imaginary;
-		return *this;
+		return *this = *this + other_;
 	}
 
 	const Complex& Complex::operator-=(const Complex& other_)
 	{
-		m_real -= other_.m_real;
-		m_imaginary -= other_.m_imaginary;
-		return *this;	
+		return *this = *this - other_;
 	}
-
-	// 	const Complex& Complex::operator*=(const Complex& other_) {}
-	//	const Complex& Complex::operator/=(const Complex& other_) {}
 
 	void Complex::SetReal(double real_)
 	{
