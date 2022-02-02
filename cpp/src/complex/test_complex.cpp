@@ -26,7 +26,7 @@ int main()
 	Test(c3, 2, 1, __LINE__);
 
 	// std::cin >> c1;
-	// std::cout << c1;
+	// std::cout << c1 << std::endl;
 
 	c1 = Complex(1, 2);
 	c2 = Complex(2, 4);
@@ -35,6 +35,14 @@ int main()
 	c3 = c3 / c2;
 	Test(c3, 1, 2, __LINE__);
 
+	std::cout << "BenchMade:" << std::endl;
+
+	for(int i = 0; i < 100000; ++i)
+	{
+		c1 += c1;
+	}
+
+	return 0;
 }
 
 static void Test(const Complex& c, double e_real, double e_imaginary, int line)
