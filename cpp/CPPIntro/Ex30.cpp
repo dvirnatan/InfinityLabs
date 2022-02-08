@@ -56,8 +56,8 @@ void MyTerminate()
 }
 int main()
 {
-    set_unexpected(MyUnexpected);
-    set_terminate(MyTerminate);
+    // set_unexpected(MyUnexpected);
+    // set_terminate(MyTerminate);
 
     try // a block of code that can throw an exception.
     {

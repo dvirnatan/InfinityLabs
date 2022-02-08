@@ -1,4 +1,5 @@
 #include <iostream>
+#include <typeinfo>
 
 using namespace std;
 
@@ -49,7 +50,7 @@ class J
 {
 public:
     J() : m_y(new Y), m_x(new X) { cerr << "J Ctor" << endl; }
-    ~J(){ cerr << "J Dtor" << endl; delete m_x; delete m_y; }
+    ~J(){ cerr << "J Dtor" << endl; delete m_x; m_x = NULL; delete m_y;  }
 private:
     Y *m_y;
     X *m_x;
@@ -69,7 +70,13 @@ int main()
 {
     try
     {
+        // J var1;
+        // M var1;
+        // L var1;
+        // Y var1;
+        // X var1;
         K var1;
+        // N var1;
     }
     catch(const std::exception& e)
     {

@@ -48,7 +48,7 @@ RCString& RCString::operator=(const RCString& other_) noexcept
 	++(other_.m_rcstr->m_cntr);
 	this->~RCString();
 	this->m_rcstr = other_.m_rcstr;
-	return const_cast<RCString&>(other_);
+	return const_cast<RCString&>(other_); // TODO: maybe return this no other.
 }
 
 const char *RCString::CStr() const noexcept
