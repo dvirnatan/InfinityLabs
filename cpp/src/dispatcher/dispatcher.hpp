@@ -12,6 +12,9 @@ template<typename T>
 class AbstractSubscriber;
 
 template<typename T>
+class Subscriber;
+
+template<typename T>
 class Dispatcher
 {
 public:
@@ -24,6 +27,7 @@ private:
     void Unsubscribe(AbstractSubscriber<T>& obj);
 
     friend class AbstractSubscriber<T>;
+    friend class Subscriber<T>;
     std::set<AbstractSubscriber<T> *> m_subs;
 };
 
@@ -40,6 +44,8 @@ private:
 
     virtual void Update(const T& msg) const;
     virtual void Death() const;
+
+    Dispatcher<T> *m_dispacher;
 };
 
 template <class T>
@@ -52,6 +58,7 @@ private:
     virtual void Death() const =0;
 
     friend class Subscriber<T>;
+    friend class Dispatcher<T>;
 };
 
 /*************************** Dispatcher ***************************************/
@@ -93,13 +100,13 @@ void Dispatcher<T>::Unsubscribe(AbstractSubscriber<T>& obj)
 template <class T>
 AbstractSubscriber<T>::AbstractSubscriber()
 {
-
+    // Empty
 }
 
 template <class T>
 AbstractSubscriber<T>::~AbstractSubscriber()
 {
-
+    // Empty
 }
 
 /***************************** Subscriber *************************************/
@@ -108,15 +115,16 @@ template <class T>
 Subscriber<T>::Subscriber(std::function<void (const T&)> update, 
                                 std::function<void ()>death, Dispatcher<T> &obj)
 :m_update(update),
-m_death(death)
+m_death(death),
+m_dispacher(&obj)
 {
-    Subscribe(obj);
+    m_dispacher->Subscribe(*this);
 }
 
 template <class T>
 Subscriber<T>::~Subscriber()
 {
-    Unsubscribe(*this);
+    m_dispacher->Unsubscribe(*this);
 }
 
 template <class T>

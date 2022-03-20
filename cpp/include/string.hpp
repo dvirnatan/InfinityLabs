@@ -1,1 +1,1 @@
-/home/dvir/git/cpp/src/string/string.hpp
+../src/string/string.hpp

@@ -1,1 +1,1 @@
-/home/dvir/git/cpp/src/stl_containers/test_stl_containers.cpp
+../src/stl_containers/test_stl_containers.cpp
